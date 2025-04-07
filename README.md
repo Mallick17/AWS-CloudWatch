@@ -14,5 +14,7 @@ Amazon CloudWatch solves the problem of responding to events and alarms, as they
 
 ### How can I architect a cloud solution using CloudWatch?
 We can architect a solution by using Amazon CloudWatch to monitor the CPU utilization and take action.
+
 ![image](https://github.com/user-attachments/assets/9b13e2f4-68d0-46fb-b4ae-2f3e49bc4fe4)
-In the diagram, CloudWatch receives data on the EC2 instance CPU utilization. When the CPU goes over a specified percent, CloudWatch triggers Amazon EC2 Auto Scaling to provision an additional instance to help with the workload. Therefore, the first instance isn’t overloaded.
+
+- In the diagram, CloudWatch receives data on the EC2 instance CPU utilization. When the CPU goes over a specified percent, CloudWatch triggers Amazon EC2 Auto Scaling to provision an additional instance to help with the workload. Therefore, the first instance isn’t overloaded.
