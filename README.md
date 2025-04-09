@@ -38,3 +38,37 @@ For example, EC2 instances, by default, are enabled with basic CloudWatch monito
 Amazon CloudWatch does not require an upfront commitment or minimum fee; you pay for what you use. You are charged at the end of the month for your usage.
 
 Amazon CloudWatch charges you for alarms, custom events, metrics collection, and dashboards that you set up. However, you can get started with Amazon CloudWatch for free. Most AWS services (Amazon EC2, Amazon S3, Amazon Kinesis, and others) send metrics automatically for free to CloudWatch. Many applications should be able to operate within these free tier limits.
+
+### Additional AWS Services and Their Use Cases
+
+1. **Amazon Simple Queue Service (SQS):**
+   - **Use Case:** Queue alarm notifications for processing by other applications.
+   - **Integration:** Configure an SNS topic to send messages to an SQS queue, which can be polled by a Lambda function or worker application.
+   - **Benefit:** Decouples notification handling, allowing asynchronous processing.
+
+2. **Amazon Simple Email Service (SES):**
+   - **Use Case:** Customize email content beyond SNS default templates.
+   - **Integration:** Use SES as a subscription endpoint for SNS or trigger SES directly via Lambda for branded emails.
+   - **Benefit:** Offers advanced email formatting and tracking (e.g., delivery status).
+
+3. **Amazon CloudTrail:**
+   - **Use Case:** Log alarm state changes for auditing.
+   - **Integration:** Enable CloudTrail to capture CloudWatch API calls (e.g., `PutMetricAlarm`) and store them in S3.
+   - **Benefit:** Provides a compliance and troubleshooting trail.
+
+4. **Amazon Step Functions:**
+   - **Use Case:** Orchestrate complex workflows triggered by alarms.
+   - **Integration:** Use EventBridge to start a Step Functions state machine that coordinates Lambda, SNS, and other services.
+   - **Benefit:** Automates multi-step incident response (e.g., notify team, scale resources, log incident).
+
+5. **Amazon DynamoDB:**
+   - **Use Case:** Store alarm history or metadata.
+   - **Integration:** Use a Lambda function triggered by the alarm to write data to a DynamoDB table.
+   - **Benefit:** Enables long-term storage and querying of alarm events.
+
+6. **Amazon Simple Storage Service (S3):**
+   - **Use Case:** Archive alarm data or logs.
+   - **Integration:** Configure a Lambda function to upload alarm details to an S3 bucket.
+   - **Benefit:** Provides durable storage for historical analysis.
+
+---
