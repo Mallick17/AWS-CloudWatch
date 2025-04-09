@@ -25,6 +25,35 @@ This is the foundation of the alarm, where you define what to monitor and the co
   - Adjust the period and datapoints based on how frequently you want the alarm to check (shorter periods may incur additional costs for high-resolution alarms).
   - Preview the graph to validate the threshold setting.
 
+<details>
+  <summary>Refference Images</summary>
+
+## Step 1
+![Specify metric and conditions - Step 1](https://github.com/user-attachments/assets/d7d78fe9-84f4-43d2-bed6-a2e3f2211718)
+
+---
+
+![Widget Type](https://github.com/user-attachments/assets/1bdad67b-a1ed-4201-b010-67996f3a85d8)
+
+---
+
+![Multi Source Query](https://github.com/user-attachments/assets/f6c484c7-0529-420a-afc4-d8fc667c0660)
+
+---
+
+![Metrices](https://github.com/user-attachments/assets/64224fa9-28fb-4b60-acee-11b810ce71be)
+
+---
+
+![Source](https://github.com/user-attachments/assets/1f129cba-4391-4fd3-9b06-9a79e0d99d10)
+
+---
+
+![Graphed Metrices](https://github.com/user-attachments/assets/4c4ad730-38d1-4613-b01a-5154bae1a35c)
+  
+</details>
+
+
 #### Step 2: Configure Actions
 This step defines what happens when the alarm state changes (e.g., from `OK` to `In Alarm`).
 
