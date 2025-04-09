@@ -76,6 +76,24 @@ This step defines what happens when the alarm state changes (e.g., from `OK` to 
   - Multiple actions can be configured for a single alarm.
   - Test the notification by changing the alarm state manually if needed.
 
+<details>
+  <summary>Refference Images</summary>
+
+## Step 2
+![Configure Actions - Step 2](https://github.com/user-attachments/assets/7ea12b60-2f69-419c-8d2b-5420dbecaac9)
+
+---
+
+![SNS Topic and Subscription](https://github.com/user-attachments/assets/0ec6f104-3cda-4730-8fa5-9782fc197026)
+
+---
+
+![Subscritpion Confirmed](https://github.com/user-attachments/assets/d72cf0ea-d6c3-4982-b672-1278705bab9e)
+
+---
+
+</details>  
+
 #### Step 3: Add Name and Description
 Provide a clear identifier and context for the alarm.
 
@@ -86,6 +104,14 @@ Provide a clear identifier and context for the alarm.
 - **Key Points:**
   - Use descriptive names to avoid confusion, especially with multiple alarms.
   - Keep the description concise but informative (up to 1024 characters).
+
+
+<details>
+  <summary>Refference Images</summary>
+
+![Add Name and Description - Step 3](https://github.com/user-attachments/assets/3fd9629e-208b-4c2b-9137-01f6b0ae60c8)
+
+</details>  
 
 #### Step 4: Preview and Create
 Review and finalize the alarm configuration.
@@ -98,6 +124,19 @@ Review and finalize the alarm configuration.
   - Double-check all settings before creating.
   - After creation, the alarm appears in the CloudWatch Alarms list and begins monitoring.
 
+<details>
+  <summary>Refference Images</summary>
+
+![Preview and Create - Step 4](https://github.com/user-attachments/assets/c99ad1aa-e4fe-4349-a6c7-aa34191e3e56)
+
+</details>  
+
 ---
+
+## CloudWatch
+![CloudWatchAlarmCreated](https://github.com/user-attachments/assets/ed986e84-32a1-4811-a244-76ff80842249)
+
+
 ## Alarm Received in the as per the Configuration
 ![image](https://github.com/user-attachments/assets/39ec98bc-4bca-4891-99fb-40f5d28eeaff)
+
