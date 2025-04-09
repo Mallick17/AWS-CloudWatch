@@ -211,6 +211,61 @@ Review the configuration, including metrics, conditions, and actions involving m
   
 </details>
 
+<details>
+  <summary>Creating a CloudWatch Alarm with Multi-Service Integration in AWS</summary>
+
+### Creating a CloudWatch Alarm with Multi-Service Integration in AWS
+
+#### Objective
+To set up a CloudWatch Alarm to monitor an EC2 instance’s `CPUUtilization` and integrate with SNS for email notifications, Auto Scaling for resource adjustment, and Systems Manager for incident management.
+
+#### Prerequisites
+- AWS account with permissions for CloudWatch, SNS, EC2, Auto Scaling, and Systems Manager.
+- EC2 instance generating metrics.
+- Confirmed SNS subscription and configured Auto Scaling group (if used).
+
+#### Steps
+1. **Specify Metric and Conditions**
+   - Navigate to CloudWatch > Alarms > Create Alarm.
+   - Select `CPUUtilization` from `AWS/EC2` for instance `i-09d7e99ae60e1809`.
+   - Set a static threshold (e.g., `Lower` than 10%) with a 30-second period.
+   - Explore metrics from RDS, S3, Lambda, or ELB if monitoring other services.
+
+2. **Configure Actions**
+   - **SNS:** Create a topic (`Mallow_CloudWatch_Alarms_Topic`) and subscribe an email (e.g., `gyanaranjanjammik44@gmail.com`).
+   - **Auto Scaling:** Add a scaling policy to adjust instance count based on `CPUUtilization`.
+   - **Systems Manager:** Create an OpsItem for incident tracking.
+   - **Optional:** Integrate Lambda for custom logic, EventBridge for workflows, or SQS for queuing.
+
+3. **Add Name and Description**
+   - Name: `Mallow_Alarm`.
+   - Description: “Monitors CPUUtilization for ROR-App instance. Triggers SNS, scales via Auto Scaling, and logs to Systems Manager.”
+
+4. **Preview and Create**
+   - Review all settings and create the alarm.
+
+##### Additional Services
+- **SQS:** Queue notifications for asynchronous processing.
+- **SES:** Customize email content.
+- **CloudTrail:** Log alarm changes for auditing.
+- **Step Functions:** Orchestrate multi-step responses.
+- **DynamoDB:** Store alarm history.
+- **S3:** Archive alarm data.
+
+#### Important Considerations
+- **Permissions:** Ensure IAM roles allow access to all integrated services.
+- **Costs:** High-resolution alarms and additional service usage (e.g., Lambda invocations) may incur charges.
+- **Testing:** Simulate conditions to test notifications, scaling, and other actions.
+- **Maintenance:** Regularly review thresholds and service integrations.
+
+#### Troubleshooting
+- **No Notifications:** Confirm SNS subscription and topic permissions.
+- **Scaling Issues:** Check Auto Scaling group configuration and policies.
+- **Service Errors:** Verify IAM roles and service quotas.
+
+---
+  
+</details>
 ---
 
 
