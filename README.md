@@ -134,7 +134,13 @@ Review and finalize the alarm configuration.
 ---
 
 ## CloudWatch
+![image](https://github.com/user-attachments/assets/9f7b1a3a-c1de-4a4a-bb44-688c314e87d9)
+
+---
+
 ![CloudWatchAlarmCreated](https://github.com/user-attachments/assets/ed986e84-32a1-4811-a244-76ff80842249)
+
+---
 
 
 ## Alarm Received in the as per the Configuration
