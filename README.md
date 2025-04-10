@@ -5,20 +5,23 @@
 
 ## CloudWatch Logs
 
-**Overview and Basics:**
-CloudWatch Logs is a service that lets you monitor, store, and access log files from AWS resources like EC2 instances and Lambda functions. It’s great for centralizing logs for easy viewing and analysis, helping you troubleshoot issues or audit activities.
+**Overview and Fundamentals:**
+Amazon CloudWatch Logs enables monitoring, storing, and accessing log files from AWS resources such as Amazon EC2 instances, AWS Lambda functions, and AWS CloudTrail. It centralizes logs from systems, applications, and AWS services in a scalable service, offering features for viewing, searching, filtering, archiving logs securely, and querying with a powerful query language. Logs are divided into two classes: Standard (full features) and Infrequent Access (lower ingestion charges, subset of Standard capabilities). For details, see [What is Amazon CloudWatch Logs?](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html).
 
 **Creating and Configuring Log Groups:**
-- You can create a log group through the AWS Management Console by going to CloudWatch > Log groups > Actions > Create log group, entering a name, and setting it up.
-- Configure retention settings, which default to indefinite but can be set to expire after, say, 30 days, via the console by selecting the log group and editing the retention.
-- Tagging is supported, with a maximum of 50 tags per log group, useful for organizing and managing access.
+
+- **Creation Methods:** Log groups can be created via the AWS Management Console, AWS CLI, or during CloudWatch Logs agent installation on EC2 instances. To create via console, navigate to [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/), select Log groups, choose Actions > Create log group, enter a name, and create. CLI command example: `aws logs create-log-group --log-group-name MyLogGroup`.
+- **Retention Settings:** Default retention is indefinite, adjustable between 10 years and 1 day. Change via console: Select log group, choose Actions > Edit retention setting, set period (e.g., 30 days). Takes up to 72 hours for log events to delete after reaching retention.
+- **Tagging:** Add tags during creation or later, with a maximum of 50 tags per log group. Use AWS CLI commands like `aws logs tag-resource` for tagging, with key restrictions (1-128 Unicode characters, values 0-255, cannot start with "aws:"). See [Working with log groups and log streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html) for CLI and API details.
 
 **Setting Up Log Streams:**
-- Log streams are sequences of log events from the same source, like an EC2 instance. They’re automatically created when a resource starts sending logs to CloudWatch, or you can set them up manually for custom applications using agents or SDKs.
+
+- A log stream is a sequence of log events sharing the same source, belonging to one log group, with no limit on the number of streams per group. Automatically received from AWS services or sent using methods like the CloudWatch Logs agent or SDKs. For EC2, install the agent as an RPM (e.g., `sudo yum install -y awslogs` for Amazon Linux), ensuring logs are sent to the specified log stream.
 
 **Searching and Filtering Log Data:**
-- Use the console to view logs by selecting a log group and stream, then filter using the search field for quick lookups.
-- For deeper analysis, CloudWatch Logs Insights offers a query language for interactive searching, helping you find specific log patterns or errors.
+
+- **Console Search:** View logs by navigating to [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/), selecting Log groups, choosing a group and stream, and using the search field for filtering. Specify time ranges (Absolute or Relative, e.g., last 24 hours) and switch between UTC and local time zone.
+- **CloudWatch Logs Insights:** Use for interactive search and analysis, with a query language, sample queries, autocompletion, and field discovery. Create field indexes to improve query performance and reduce scan volume. Use Live Tail for near real-time viewing, filtering, and highlighting of ingested logs. See [Analyzing log data with CloudWatch Logs Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html) for query examples.
 
 **Example:**
 To create a log group with 30-day retention using AWS CLI:
@@ -29,49 +32,67 @@ aws logs create-log-group --log-group-name MyLogGroup --retention-in-days 30
 ---
 
 ## CloudWatch Metrics
+**Overview and Concepts:**
+CloudWatch Metrics are time-ordered data points representing the performance of AWS systems, kept for 15 months for historical analysis. Default metrics are provided free for resources like EC2 instances, EBS volumes, and RDS DB instances, with options for detailed monitoring or publishing custom metrics. See [Metrics in Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html).
 
-**Understanding Metrics:**
-CloudWatch Metrics are time-series data points that show how AWS resources are performing, like CPU usage on an EC2 instance. They help you monitor resource health and optimize performance.
+**AWS Services Supported by CloudWatch Metrics:**
 
-**AWS Services Supported:**
-Many AWS services publish metrics to CloudWatch, including Amazon EC2, RDS, S3, and Lambda. For a full list, check the [AWS documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html). You can also publish custom metrics from your applications using the CloudWatch API.
+A comprehensive list includes services like AWS Amplify, Amazon API Gateway, Amazon Aurora (under AWS/RDS namespace), and many others. Below is a partial table for clarity:
 
-**Example:**
-To publish a custom metric via AWS CLI:
+| Service                              | Namespace                          | Documentation                                                                 |
+|--------------------------------------|------------------------------------|------------------------------------------------------------------------------|
+| Amazon EC2                           | AWS/EC2                            | [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html) |
+| Amazon RDS                           | AWS/RDS                            | [https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMySQL.Monitoring.Metrics.html](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMySQL.Monitoring.Metrics.html) |
+| Amazon S3                            | AWS/S3                             | [https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-monitoring.html](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-monitoring.html) |
+| AWS Lambda                           | AWS/Lambda                         | [https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html) |
+
+For a complete list, refer to [AWS services that publish CloudWatch metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html).
+
+**Custom Metrics:**
+Publish custom metrics as standard (1-minute resolution) or high resolution (1-second, higher charge). Use `aws cloudwatch put-metric-data` for CLI, e.g.:
 ```bash
 aws cloudwatch put-metric-data --namespace MyNamespace --metric-name MyMetric --value 42
 ```
 
----
 
-## CloudWatch Alarms
+## CloudWatch Alarms: States, Thresholds, and Actions
+**Overview and Alarm States:**
+CloudWatch Alarms monitor a single metric or expression, with possible states: `OK` (within threshold), `ALARM` (outside threshold), `INSUFFICIENT_DATA` (alarm just started, metric unavailable, or insufficient data). See [Using Amazon CloudWatch alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html).
 
-**Overview and States:**
-CloudWatch Alarms watch a metric over time and can be in three states: OK (within threshold), ALARM (breached threshold), or INSUFFICIENT_DATA (not enough data). They’re useful for alerting you to issues, like high CPU usage.
+**Setting Thresholds:**
 
-**Setting Thresholds and Actions:**
-- Choose a metric (e.g., CPUUtilization), set a threshold (e.g., >80%), and define evaluation periods (e.g., 5 minutes for 2 periods).
-- Actions trigger on state changes, like sending an SNS notification or stopping an EC2 instance. Options include EC2 actions, Auto Scaling, and starting investigations.
+- **Period:** Length of time (seconds) to evaluate metric/expression for each data point, e.g., 300 seconds (5 minutes). For high-resolution alarms, can be 10s, 20s, 30s (higher charge); regular alarms use multiples of 60s.
+- **Evaluation Periods:** Number of recent periods/data points to evaluate, e.g., 2 periods.
+- **Datapoints to Alarm:** Number of breaching data points within Evaluation Periods to trigger `ALARM`, not consecutive, must be within last Evaluation Periods. For periods ≥1 minute, evaluated every minute; multi-day alarms (>1 day) evaluated hourly.
+- **Percentile Alarms:** Setting used when <10/(1-percentile) data points for percentiles 0.5–1.0, or <10/percentile for 0–0.5, e.g., <1000 samples for p99.
+
+**Actions:**
+
+- Triggered on state transitions (except Auto Scaling, invoked once/minute in new state). Supported actions include sending Amazon SNS notifications, EC2 actions (stop, terminate, reboot, recover), Auto Scaling actions, starting Amazon Q investigations, and creating Systems Manager OpsItems/incidents.
+- Composite alarms can send SNS notifications, create investigations/OpsItems/incidents, but not EC2/Auto Scaling actions.
+- Lambda actions are asynchronous, with retries if failed; require resource policy (e.g., CLI: `aws lambda add-permission` with principal `lambda.alarms.cloudwatch.amazonaws.com`).
+- EventBridge integration: Alarms emit events, trigger actions; see [What is Amazon EventBridge?](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html).
+- Missing data treatment options: `notBreaching`, `breaching`, `ignore`, `missing` (default `missing`); DynamoDB metrics always ignore missing data.
 
 **Example:**
-Create an alarm for high CPU on EC2:
+Create an alarm for high CPU utilization:
 ```bash
 aws cloudwatch put-metric-alarm --alarm-name HighCPUAlarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 300 --threshold 80 --comparison-operator GreaterThanThreshold --dimensions Name=InstanceId,Value=i-1234567890abcdef0 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:123456789012:MyTopic
 ```
 
----
+#### CloudWatch Events (Amazon EventBridge): Targets and Actions
 
-## CloudWatch Events (Amazon EventBridge)
-
-**Overview:**
-Now part of EventBridge, this service routes events (like EC2 state changes) to targets based on rules, enabling event-driven architectures. It’s great for connecting applications and reacting to changes in real-time.
+**Overview and Fundamentals:**
+Amazon EventBridge, formerly CloudWatch Events, is a serverless event bus service for connecting applications using events, enabling event-driven architectures. Events represent state changes or occurrences, routed via rules to targets. See [What Is Amazon EventBridge?](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html).
 
 **Targets and Actions for Event Rules:**
-- Create rules to match events, either by pattern (e.g., EC2 state changes) or schedule (e.g., every hour).
-- Targets can be AWS services like Lambda, SQS, or SNS, where events trigger actions like running a function or sending a notification.
+
+- **Event Rules:** Specify what EventBridge does with events delivered to event buses. Two types: match on event data (event pattern) or run on schedule. Event pattern defines structure and fields to match, e.g., EC2 state changes. Schedule rules use cron or rate expressions, now recommended via EventBridge Scheduler for scalability. See [Creating rules that react to events in Amazon EventBridge](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule.html).
+- **Targets:** Event buses deliver to zero or more targets; Pipes deliver to a single target. Common targets include AWS Lambda functions, Amazon SQS queues, Amazon SNS topics, and more. Pipes support advanced transformations and enrichment prior to delivery.
+- **Actions:** Actions are the invocation of targets, such as running a Lambda function, sending an SNS notification, or triggering an SQS message. EventBridge can create necessary IAM roles for permissions, e.g., for Lambda targets.
 
 **Example:**
-Set up a rule to trigger Lambda on EC2 state change:
+Create a rule to trigger Lambda on EC2 state change:
 ```bash
 aws events put-rule --name EC2StateChangeRule --event-pattern "{\"source\":[\"aws.ec2\"],\"detail-type\":[\"EC2 Instance State-change Notification\"]}"
 aws events put-targets --rule EC2StateChangeRule --targets "Id"="1","Arn"="arn:aws:lambda:us-east-1:123456789012:function:MyFunction"
@@ -81,21 +102,26 @@ aws events put-targets --rule EC2StateChangeRule --targets "Id"="1","Arn"="arn:a
 
 ## Pricing
 
-CloudWatch pricing depends on usage, with a free tier for basics:
-- **Metrics:** Free for AWS-provided metrics; custom metrics cost per metric per month.
-- **Logs:** Charges for data ingested, archived, and analyzed, based on volume.
-- **Alarms:** Cost per alarm per month, with a limit in the free tier.
-- **Dashboards:** Per dashboard per month for viewing metrics.
-- For detailed rates, see the [AWS CloudWatch Pricing page](https://aws.amazon.com/cloudwatch/pricing/).
+CloudWatch pricing is usage-based, with a free tier for initial usage. Details include:
+
+- **Metrics:** Free for basic metrics from AWS services; custom metrics cost per metric per month, with high-resolution metrics (1-second) incurring higher charges. See [Publish custom metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html).
+- **Logs:** Charges based on data ingested (GB), archived (GB-month), and analyzed (queries). Standard logs have full features; Infrequent Access logs lower ingestion charges. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
+- **Alarms:** Cost per alarm per month, with a free tier limit. High-resolution alarms (10s, 30s periods) have additional charges.
+- **Dashboards:** Per dashboard per month for viewing metrics, with charges for API requests and data transfer.
+- **Events:** Charges based on events published, rules invoked, and targets processed, with EventBridge Scheduler costs for scheduled invocations.
+
+For exact rates, consult the [AWS CloudWatch Pricing page](https://aws.amazon.com/cloudwatch/pricing/).
+
 
 ---
 
 ## Terraform with CloudWatch
 
 **Overview:**
-Terraform lets you manage CloudWatch resources using code, ensuring consistent setups. It’s ideal for defining log groups, alarms, and event rules programmatically.
+Terraform, an infrastructure as code tool, enables programmatic management of CloudWatch resources. Use the AWS provider for resources like `aws_cloudwatch_log_group`, `aws_cloudwatch_metric_alarm`, and `aws_cloudwatch_event_rule`. See [Terraform AWS Provider documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs).
 
 **Examples:**
+
 - **Log Group:**
 ```hcl
 resource "aws_cloudwatch_log_group" "example" {
@@ -121,7 +147,9 @@ resource "aws_cloudwatch_metric_alarm" "example" {
   alarm_actions = ["arn:aws:sns:us-east-1:123456789012:MyTopic"]
 }
 ```
-For more, check the [Terraform AWS Provider documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs).
+- **Event Rule:** Similar to CLI, define rules and targets in HCL for consistency and versioning.
+
+Best practices include avoiding hardcoded values, using variables for dynamic configurations, and regularly updating Terraform versions for compatibility.
 
 ---
 
