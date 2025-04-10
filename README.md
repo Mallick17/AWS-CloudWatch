@@ -1,8 +1,6 @@
-Sure! Here's the detailed documentation to monitor memory usage on an AWS EC2 instance using the same structured format you provided:
-
 ---
 
-**Documentation: Monitoring Memory Usage on AWS EC2 using CloudWatch Agent**
+# **Documentation: Monitoring Memory Usage on AWS EC2 using CloudWatch Agent**
 
 ---
 
