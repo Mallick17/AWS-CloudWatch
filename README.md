@@ -1,6 +1,6 @@
 ---
 
-# **Documentation: Monitoring Memory Usage on AWS EC2 using CloudWatch Agent**
+# **Monitoring Memory Usage on AWS EC2 using CloudWatch Agent**
 
 ---
 
