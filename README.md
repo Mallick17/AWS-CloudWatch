@@ -138,4 +138,4 @@ Verifying in CloudWatch ensures that your agent is working correctly and memory 
 
 ---
 
-Let me know if you’d like this in a downloadable format (Markdown, PDF, etc.) or want to add alerting steps!
+Refference: [Wojciech Lepczyński - DevOps Cloud Architect - How to monitor memory usage on AWS EC2 ??](https://lepczynski.it/en/aws_en/how-to-monitor-memory-usage-on-aws-ec2/)
