@@ -39,6 +39,9 @@ Amazon CloudWatch does not require an upfront commitment or minimum fee; you pay
 
 Amazon CloudWatch charges you for alarms, custom events, metrics collection, and dashboards that you set up. However, you can get started with Amazon CloudWatch for free. Most AWS services (Amazon EC2, Amazon S3, Amazon Kinesis, and others) send metrics automatically for free to CloudWatch. Many applications should be able to operate within these free tier limits.
 
+<details>
+   <summary>Additional AWS Services and Their Use Cases in CloudWatch</summary>
+
 ### Additional AWS Services and Their Use Cases
 
 1. **Amazon Simple Queue Service (SQS):**
@@ -72,3 +75,5 @@ Amazon CloudWatch charges you for alarms, custom events, metrics collection, and
    - **Benefit:** Provides durable storage for historical analysis.
 
 ---
+   
+</details>
