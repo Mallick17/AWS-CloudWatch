@@ -26,7 +26,7 @@
 
 **Reason:**
 
-This IAM role grants EC2 instances the permissions required to run and send custom metrics (like memory usage) to Amazon CloudWatch using the CloudWatch Agent.
+This IAM role grants EC2 instances the permissions required to run and send custom metrics (like memory usage and logs) to Amazon CloudWatch using the CloudWatch Agent.
 
 ---
 
@@ -45,7 +45,7 @@ This IAM role grants EC2 instances the permissions required to run and send cust
 
 **Reason:**
 
-Attaching the IAM role allows the CloudWatch Agent running on the EC2 instance to authenticate and publish memory metrics to CloudWatch.
+Attaching the IAM role allows the CloudWatch Agent running on the EC2 instance to authenticate and publish memory metrics & logs to CloudWatch.
 
 ---
 
@@ -70,7 +70,7 @@ sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
 
 **Reason:**
 
-The CloudWatch Agent is necessary for collecting and pushing system-level metrics (like memory usage) to CloudWatch, which aren't available by default.
+The CloudWatch Agent is necessary for collecting and pushing system-level metrics (like memory usage& & logs) to CloudWatch, which aren't available by default.
 
 ---
 
@@ -142,7 +142,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 
 **Reason:**
 
-This command fetches the config file, initializes the agent, and starts collecting memory metrics.
+This command fetches the config file, initializes the agent, and starts collecting memory metrics and logs.
 
 ---
 
@@ -158,6 +158,28 @@ This command fetches the config file, initializes the agent, and starts collecti
 **Reason:**
 
 Verifying in CloudWatch ensures that your agent is working correctly and memory metrics are being reported for monitoring and alerting.
+
+---
+
+### **Step 7: Verify NGINX Logs in CloudWatch Logs**
+
+**Navigate to CloudWatch Logs**
+
+- In the AWS Console, go to **CloudWatch**.
+- In the left sidebar, click **Logs** > **Log groups**.
+- Look for a log group named: `NginxLogGroup`.
+
+**View Log Streams**
+
+- Click on the log group `NginxLogGroup`.
+- You will see log streams like:
+  - `{instance_id}/access.log`
+  - `{instance_id}/error.log`
+- Click on a log stream to view the log events.
+
+**Reason:**
+
+This confirms that NGINX logs are being captured and streamed correctly into CloudWatch Logs for visibility and debugging purposes.
 
 ---
 
