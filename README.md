@@ -1,5 +1,5 @@
 # Amazon CloudWatch
-- Amazon CloudWAtch is a monitoring and observation service that is built for DevOps Engineers, developers, security engineers and IT managers.
+- Amazon CloudWatch is a monitoring and observation service that is built for DevOps Engineers, developers, security engineers and IT managers.
 - CloudWatch provides you with data and actionable insights to monitor your applications, respond to system-wide performance changes, and optimize resource utilization. You get a unified view of operational health.
 ---
 
