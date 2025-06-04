@@ -1,0 +1,41 @@
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "root"
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/nginx/access.log",
+            "log_group_name": "/nginx/access",
+            "log_stream_name": "access-log-{hostname}",
+            "timestamp_format": "%b %d %H:%M:%S"
+          }
+        ]
+      }
+    }
+  },
+  "metrics": {
+    "metrics_collected": {
+      "disk": {
+        "measurement": [
+          "used_percent",
+          "inodes_free",
+          "free",
+          "total"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "/",
+          "/opt/aws/amazon-cloudwatch-agent/logs",
+          "/opt/aws/amazon-cloudwatch-agent/metrics"
+        ]
+      }
+    },
+    "append_dimensions": {
+      "Container": "${hostname}"
+    }
+  }
+}
