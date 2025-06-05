@@ -1,16 +1,20 @@
 {
    "metrics": {
       "metrics_collected": {
-         "mem": {
+         "disk": {
             "measurement": [
-               "mem_used"
+               "disk_used",
+               "disk_free"
             ],
             "metrics_collection_interval": 10,
+            "resources":[
+                    "*"
+            ],
             "unit": "Megabytes"
          }
       },
       "append_dimensions": {
-        "ContainerName": "nginx-cloudwatch-agent-container"
+        "ContainerName": "nginx-cloudwatch-agent-container-INSTANCE_ID"
       }
    },
    "logs": {
@@ -20,7 +24,7 @@
                {
                   "file_path": "/var/log/nginx/access.log",
                   "log_group_name": "NginxLogGroup-mallick",
-                  "log_stream_name": "mallick-nginxagent/access.log",
+                  "log_stream_name": "mallick-nginxagent-INSTANCE_ID/access.log",
                   "timestamp_format": "[%d/%b/%Y:%H:%M:%S %z]"
                }
             ]
