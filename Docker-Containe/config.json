@@ -1,0 +1,30 @@
+{
+   "metrics": {
+      "metrics_collected": {
+         "mem": {
+            "measurement": [
+               "mem_used"
+            ],
+            "metrics_collection_interval": 10,
+            "unit": "Megabytes"
+         }
+      },
+      "append_dimensions": {
+        "ContainerName": "nginx-cloudwatch-agent-container"
+      }
+   },
+   "logs": {
+      "logs_collected": {
+         "files": {
+            "collect_list": [
+               {
+                  "file_path": "/var/log/nginx/access.log",
+                  "log_group_name": "NginxLogGroup-mallick",
+                  "log_stream_name": "mallick-nginxagent/access.log",
+                  "timestamp_format": "[%d/%b/%Y:%H:%M:%S %z]"
+               }
+            ]
+         }
+      }
+   }
+}
