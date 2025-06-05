@@ -1,26 +1,26 @@
 FROM amazonlinux:2
 
-# Install nginx and cloudwatch agent
-RUN yum update -y && \
-    yum install -y amazon-linux-extras && \
-    amazon-linux-extras enable nginx1 && \
-    yum clean metadata && \
-    yum install -y nginx curl unzip procps && \
-    curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm && \
-    yum install -y amazon-cloudwatch-agent.rpm && \
-    rm -f amazon-cloudwatch-agent.rpm && \
-    yum clean all
+# Enable EPEL repository and install necessary packages
+RUN amazon-linux-extras install epel -y && \
+    yum update -y && \
+    yum install -y nginx python3-pip amazon-cloudwatch-agent && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
-# Copy your configs and startup script
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY cloudwatch-config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-COPY start.sh /start.sh
+# Install Supervisord using pip3
+RUN pip3 install supervisor
 
-RUN chmod +x /start.sh
+# Copy Supervisord configuration file
+COPY supervisord.conf /etc/supervisord.conf
 
-# Create log directory
-RUN mkdir -p /var/log/nginx && touch /var/log/nginx/access.log
+# Copy CloudWatch agent configuration file
+COPY config.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 
+# Ensure NGINX log directory permissions
+RUN chmod -R 644 /var/log/nginx
+
+# Expose NGINX port
 EXPOSE 80
 
-CMD ["/start.sh"]
+# Set the command to run Supervisord
+CMD ["/usr/local/bin/supervisord", "-n"]
