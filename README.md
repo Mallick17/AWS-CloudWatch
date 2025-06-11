@@ -10,7 +10,7 @@ To run NGINX and the AWS CloudWatch agent in a single Docker container using ama
 #### 1. Dockerfile
 This updated Dockerfile enables the EPEL repository to install NGINX, optimizes disk usage by cleaning up after each `yum` command, and includes a workaround for the disk space issue.
 
-```
+```Dockerfile
 FROM amazonlinux:2
 
 # Enable EPEL repository and install necessary packages
