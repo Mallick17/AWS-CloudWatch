@@ -11,6 +11,8 @@ To collect CPU utilization metrics at 1-second resolution for containers running
 - **Retention**: 1-second data points are retained for 3 hours, then aggregated to coarser resolutions over time.
 - **Cost**: Involves custom metric charges ($0.30/month beyond the first 10 free metrics) and API request costs ($0.01/1,000 requests beyond 1M free requests/month), mitigated by agent batching.
 
+---
+
 ## Setup Instructions for ECS on EC2
 1. **Install the CloudWatch Agent**:
    - Deploy the agent on EC2 instances hosting your ECS cluster. Follow the [official AWS installation guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html).
@@ -51,6 +53,8 @@ To collect CPU utilization metrics at 1-second resolution for containers running
    - Look for the `cpu_usage` metric under the `CWAgent` namespace, tagged with dimensions like `InstanceId`.
    - Select a 1-second period to confirm high-resolution data points are available for the last 3 hours.
 
+---
+
 ## Retention Period
 High-resolution metrics follow this retention schedule:
 - **1-second resolution**: Retained for 3 hours, ideal for real-time analysis.
@@ -59,8 +63,11 @@ High-resolution metrics follow this retention schedule:
 - **1-hour resolution**: Retained for 455 days (15 months) for long-term trends.
 For continuous 30-day collection, only the most recent 3 hours of data are available at 1-second resolution at any time, with older data aggregated.
 
-### Summary Tables
-To summarize the retention and pricing structure:
+<details>
+   <summary>Retention period Analysis</summary>
+
+#### Retention Period Analysis
+The retention period for CloudWatch metrics varies based on the resolution, with high-resolution metrics having a shorter initial retention due to their granularity. Research from AWS documentation and FAQs indicates the following retention schedule:
 
 | **Resolution** | **Retention Period** | **Notes** |
 |----------------|----------------------|-----------|
@@ -69,11 +76,21 @@ To summarize the retention and pricing structure:
 | 5 minutes      | 63 days             | After 15 days, for medium-term trends. |
 | 1 hour         | 455 days (15 months)| After 63 days, for long-term analysis. |
 
-| **Cost Component** | **Pricing** | **Notes** |
-|--------------------|-------------|-----------|
-| Custom Metrics     | $0.30 per metric per month | First 10 custom metrics free per month. Volume pricing for >10,000 metrics: $0.10 for next 240,000, $0.05 for next 750,000, $0.02 for over 1,000,000 metrics. |
-| API Requests (PutMetricData) | First 1,000,000 requests free per month, then $0.01 per 1,000 requests | CloudWatch agent batches metrics, typically resulting in one API call per minute per metric. For N metrics, approximately N * 43,200 requests per month. |
+- **1-second data points (high-resolution, <60 seconds)**: Retained for 3 hours. This is supported by the AWS CloudWatch FAQs, which state, "The retention period is 15 months per metric data point with automatic roll up (<60secs available for 3 hours, one min available for 15 days, 5 min available for 63 days, one hour available for 15 months)" ([APM Tool - Amazon CloudWatch FAQs - AWS](https://aws.amazon.com/cloudwatch/faqs/)).
 
+- **1-minute data points (60-second period)**: Retained for 15 days after aggregation from high-resolution data.
+
+- **5-minute data points (300-second period)**: Retained for 63 days, applicable after the 15-day period for 1-minute data.
+
+- **1-hour data points (3600-second period)**: Retained for 455 days (15 months), covering long-term analysis needs.
+
+This retention schedule is consistent across multiple sources, including a Stack Overflow discussion and AWS news blogs, confirming that high-resolution metrics are available at 1-second resolution for only 3 hours before being rolled up to standard resolutions for longer retention ([Amazon CloudWatch Update – Extended Metrics Retention & User Interface Update | AWS News Blog](https://aws.amazon.com/blogs/aws/amazon-cloudwatch-update-extended-metrics-retention-user-interface-update/), [CloudWatch extends Metrics retention and new User Interface](https://aws.amazon.com/about-aws/whats-new/2016/11/cloudwatch-extends-metrics-retention-and-new-user-interface/)).
+
+For the user's 30-day collection period, the 1-second data points would be accessible for the first 3 hours of each collection, with subsequent data aggregated and retained as per the schedule above. This means detailed, second-by-second analysis is limited to the most recent 3 hours, while longer-term trends can be analyzed at coarser resolutions.
+
+</details>
+
+---
 
 ## Cost Considerations
 Costs for high-resolution metrics depend on:
@@ -99,6 +116,61 @@ The table below estimates costs for collecting high-resolution CPU utilization m
 - The CloudWatch Agent batches data, sending approximately 43,200 `PutMetricData` calls per metric per month (one call per minute, each with 60 data points).
 - First 10 custom metrics and 1,000,000 API calls per month are free.
 - Additional metrics cost $0.30 each per month; additional API calls cost $0.01 per 1,000.
+
+| **Cost Component** | **Pricing** | **Notes** |
+|--------------------|-------------|-----------|
+| Custom Metrics     | $0.30 per metric per month | First 10 custom metrics free per month. Volume pricing for >10,000 metrics: $0.10 for next 240,000, $0.05 for next 750,000, $0.02 for over 1,000,000 metrics. |
+| API Requests (PutMetricData) | First 1,000,000 requests free per month, then $0.01 per 1,000 requests | CloudWatch agent batches metrics, typically resulting in one API call per minute per metric. For N metrics, approximately N * 43,200 requests per month. |
+
+<details>
+   <summary>Cost Calculation Analysis</summary>
+
+#### Cost Calculation for 30 Days at 1-Second Intervals
+The pricing for high-resolution metrics involves two main components: the cost of custom metrics and the cost of API requests for publishing data. The evidence leans toward the following structure based on official AWS pricing and documentation:
+
+##### Custom Metrics Cost
+Custom metrics, including high-resolution ones, are charged per metric per month, with the following tiers:
+- First 10 custom metrics are free per month, covering both standard and detailed monitoring metrics.
+- Beyond the free tier, the first 10,000 metrics cost $0.30 each per month, with volume discounts for larger volumes:
+  - Next 240,000 metrics (10,001 to 250,000): $0.10 each.
+  - Next 750,000 metrics (250,001 to 1,000,000): $0.05 each.
+  - Over 1,000,000 metrics: $0.02 each.
+
+Importantly, pricing for high-resolution metrics is identical to standard resolution metrics, as confirmed in a 2017 AWS News Blog post: "Pricing for high-resolution metrics is identical to that for standard resolution metrics, with volume tiers that can help you to realize savings when you use large numbers of metrics" ([New – High-Resolution Custom Metrics and Alarms for Amazon CloudWatch | AWS News Blog](https://aws.amazon.com/blogs/aws/new-high-resolution-custom-metrics-and-alarms-for-amazon-cloudwatch/)). This means the per-metric cost does not increase for high resolution, focusing the additional cost potential on API requests.
+
+For example, if monitoring 15 high-resolution metrics for ECS CPU utilization (5 beyond the free tier), the metric cost would be (5 * $0.30) = $1.50 per month, assuming within the first 10,000 metrics.
+
+##### API Requests Cost
+Publishing metrics to CloudWatch involves the PutMetricData API call, with the following pricing:
+- First 1,000,000 API requests per month are free, excluding certain calls like GetMetricData, which are always charged.
+- Beyond the free tier, it's $0.01 per 1,000 requests, as seen in pricing examples ([Amazon CloudWatch Pricing – Amazon Web Services (AWS)](https://aws.amazon.com/cloudwatch/pricing/)).
+
+The frequency of PutMetricData calls is critical, especially for high-resolution metrics collected every second. However, the CloudWatch agent is designed to batch metrics to optimize costs, with a default `force_flush_interval` of 60 seconds, meaning metrics are buffered and sent every minute ([Manually create or edit the CloudWatch agent configuration file - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html)). For a metric collected every second, this results in 60 data points sent in one API call every minute, aligning with standard metrics for publication frequency.
+
+For instance, for one high-resolution metric:
+- Number of API calls per month: 60 calls per hour * 24 hours * 30 days = 43,200 calls.
+- Since 43,200 is less than 1,000,000, it falls within the free tier, incurring no additional cost.
+
+For 100 metrics, it would be 4,320,000 calls monthly, exceeding the free tier by 3,320,000 calls. The additional cost would be (3,320,000 / 1,000) * $0.01 = $33.20 per month for API requests, plus the metric cost of 100 * $0.30 = $30.00 (first 10 free, next 90 at $0.30), totaling $63.20 per month.
+
+##### Batching and Cost Optimization
+The CloudWatch agent's batching mechanism is crucial for cost management. Each PutMetricData call can include up to 1,000 data points or 40 KB, whichever is smaller, and for metrics, it's typically the data point limit that matters. By collecting metrics every second and publishing every minute, the agent sends 60 data points per call, well within the limit, ensuring minimal API calls. This aligns with AWS's advice to optimize costs by reducing the frequency of API calls, as noted in documentation on reducing CloudWatch charges ([Analyzing, optimizing, and reducing CloudWatch costs - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_billing.html)).
+
+For high-resolution metrics, if published individually every second without batching, the cost could escalate significantly. For example, publishing one data point per second for one metric would result in 2,592,000 calls per month (86,400 seconds/day * 30 days), exceeding the free tier by 1,592,000 calls, costing (1,592,000 / 1,000) * $0.01 = $15.92 per month for API requests alone, plus $0.30 for the metric, totaling $16.22. However, the agent's default behavior mitigates this by batching, making the practical cost align with standard metrics for similar publication frequencies.
+
+</details>
+
+---
+
+#### Practical Implications for 30-Day Collection at 1-Second Intervals
+For the user's specific case, collecting high-resolution metrics continuously at 1-second intervals for 30 days, the setup involves configuring the CloudWatch agent with a `metrics_collection_interval` of 1 second for relevant metrics like CPU utilization. The agent will collect data every second and batch it, likely sending every 60 seconds, resulting in costs similar to standard metrics. For example, monitoring 5 containers with one CPU utilization metric each (total 5 metrics beyond the free tier):
+- Metric cost: 5 * $0.30 = $1.50 per month.
+- API requests: 5 * 43,200 = 216,000 calls, within the free tier, so no additional cost.
+- Total: $1.50 per month.
+
+For larger deployments, ensure to monitor API call volumes to avoid exceeding the free tier, especially as the number of metrics scales. The retention period ensures that 1-second data is available for the first 3 hours, suitable for real-time monitoring, with longer-term analysis possible at coarser resolutions.
+
+---
 
 ## Additional Notes
 - **Monitoring Costs**: Regularly check CloudWatch usage in the AWS Billing Dashboard to ensure API calls stay within the free tier, especially for larger deployments.
@@ -309,72 +381,13 @@ For collecting high-resolution metrics continuously at 1-second intervals over 3
 ---
 
 ### Survey Note: Detailed Analysis of High-Resolution Metrics Retention and Cost for 30 Days at 1-Second Intervals
-
-This section provides a comprehensive exploration of the retention periods and pricing for high-resolution metrics in Amazon CloudWatch, specifically for collecting data at 1-second intervals continuously over 30 days. The analysis is grounded in official AWS documentation and pricing details, ensuring accuracy and relevance for users monitoring metrics such as ECS CPU utilization.
-
 #### Background on High-Resolution Metrics
 High-resolution metrics in Amazon CloudWatch are defined as having a granularity of 1 second, compared to the standard 1-minute resolution for metrics produced by AWS services. When publishing custom metrics, users can specify either standard or high resolution by setting the `StorageResolution` parameter to 1 in the PutMetricData API request, enabling storage and retrieval at 1-second intervals ([Publish custom metrics - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html)). This is particularly useful for monitoring dynamic environments where rapid changes, such as ECS CPU utilization, need immediate visibility.
 
 For the user's scenario, collecting metrics continuously at 1-second intervals over 30 days implies using the CloudWatch agent or direct API calls to publish high-resolution custom metrics, with the agent typically batching data to optimize costs.
 
-#### Retention Period Analysis
-The retention period for CloudWatch metrics varies based on the resolution, with high-resolution metrics having a shorter initial retention due to their granularity. Research from AWS documentation and FAQs indicates the following retention schedule:
-
-- **1-second data points (high-resolution, <60 seconds)**: Retained for 3 hours. This is supported by the AWS CloudWatch FAQs, which state, "The retention period is 15 months per metric data point with automatic roll up (<60secs available for 3 hours, one min available for 15 days, 5 min available for 63 days, one hour available for 15 months)" ([APM Tool - Amazon CloudWatch FAQs - AWS](https://aws.amazon.com/cloudwatch/faqs/)).
-
-- **1-minute data points (60-second period)**: Retained for 15 days after aggregation from high-resolution data.
-
-- **5-minute data points (300-second period)**: Retained for 63 days, applicable after the 15-day period for 1-minute data.
-
-- **1-hour data points (3600-second period)**: Retained for 455 days (15 months), covering long-term analysis needs.
-
-This retention schedule is consistent across multiple sources, including a Stack Overflow discussion and AWS news blogs, confirming that high-resolution metrics are available at 1-second resolution for only 3 hours before being rolled up to standard resolutions for longer retention ([Amazon CloudWatch Update – Extended Metrics Retention & User Interface Update | AWS News Blog](https://aws.amazon.com/blogs/aws/amazon-cloudwatch-update-extended-metrics-retention-user-interface-update/), [CloudWatch extends Metrics retention and new User Interface](https://aws.amazon.com/about-aws/whats-new/2016/11/cloudwatch-extends-metrics-retention-and-new-user-interface/)).
-
-For the user's 30-day collection period, the 1-second data points would be accessible for the first 3 hours of each collection, with subsequent data aggregated and retained as per the schedule above. This means detailed, second-by-second analysis is limited to the most recent 3 hours, while longer-term trends can be analyzed at coarser resolutions.
-
-#### Cost Calculation for 30 Days at 1-Second Intervals
-The pricing for high-resolution metrics involves two main components: the cost of custom metrics and the cost of API requests for publishing data. The evidence leans toward the following structure based on official AWS pricing and documentation:
-
-##### Custom Metrics Cost
-Custom metrics, including high-resolution ones, are charged per metric per month, with the following tiers:
-- First 10 custom metrics are free per month, covering both standard and detailed monitoring metrics.
-- Beyond the free tier, the first 10,000 metrics cost $0.30 each per month, with volume discounts for larger volumes:
-  - Next 240,000 metrics (10,001 to 250,000): $0.10 each.
-  - Next 750,000 metrics (250,001 to 1,000,000): $0.05 each.
-  - Over 1,000,000 metrics: $0.02 each.
-
-Importantly, pricing for high-resolution metrics is identical to standard resolution metrics, as confirmed in a 2017 AWS News Blog post: "Pricing for high-resolution metrics is identical to that for standard resolution metrics, with volume tiers that can help you to realize savings when you use large numbers of metrics" ([New – High-Resolution Custom Metrics and Alarms for Amazon CloudWatch | AWS News Blog](https://aws.amazon.com/blogs/aws/new-high-resolution-custom-metrics-and-alarms-for-amazon-cloudwatch/)). This means the per-metric cost does not increase for high resolution, focusing the additional cost potential on API requests.
-
-For example, if monitoring 15 high-resolution metrics for ECS CPU utilization (5 beyond the free tier), the metric cost would be (5 * $0.30) = $1.50 per month, assuming within the first 10,000 metrics.
-
-##### API Requests Cost
-Publishing metrics to CloudWatch involves the PutMetricData API call, with the following pricing:
-- First 1,000,000 API requests per month are free, excluding certain calls like GetMetricData, which are always charged.
-- Beyond the free tier, it's $0.01 per 1,000 requests, as seen in pricing examples ([Amazon CloudWatch Pricing – Amazon Web Services (AWS)](https://aws.amazon.com/cloudwatch/pricing/)).
-
-The frequency of PutMetricData calls is critical, especially for high-resolution metrics collected every second. However, the CloudWatch agent is designed to batch metrics to optimize costs, with a default `force_flush_interval` of 60 seconds, meaning metrics are buffered and sent every minute ([Manually create or edit the CloudWatch agent configuration file - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html)). For a metric collected every second, this results in 60 data points sent in one API call every minute, aligning with standard metrics for publication frequency.
-
-For instance, for one high-resolution metric:
-- Number of API calls per month: 60 calls per hour * 24 hours * 30 days = 43,200 calls.
-- Since 43,200 is less than 1,000,000, it falls within the free tier, incurring no additional cost.
-
-For 100 metrics, it would be 4,320,000 calls monthly, exceeding the free tier by 3,320,000 calls. The additional cost would be (3,320,000 / 1,000) * $0.01 = $33.20 per month for API requests, plus the metric cost of 100 * $0.30 = $30.00 (first 10 free, next 90 at $0.30), totaling $63.20 per month.
-
-##### Batching and Cost Optimization
-The CloudWatch agent's batching mechanism is crucial for cost management. Each PutMetricData call can include up to 1,000 data points or 40 KB, whichever is smaller, and for metrics, it's typically the data point limit that matters. By collecting metrics every second and publishing every minute, the agent sends 60 data points per call, well within the limit, ensuring minimal API calls. This aligns with AWS's advice to optimize costs by reducing the frequency of API calls, as noted in documentation on reducing CloudWatch charges ([Analyzing, optimizing, and reducing CloudWatch costs - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_billing.html)).
-
-For high-resolution metrics, if published individually every second without batching, the cost could escalate significantly. For example, publishing one data point per second for one metric would result in 2,592,000 calls per month (86,400 seconds/day * 30 days), exceeding the free tier by 1,592,000 calls, costing (1,592,000 / 1,000) * $0.01 = $15.92 per month for API requests alone, plus $0.30 for the metric, totaling $16.22. However, the agent's default behavior mitigates this by batching, making the practical cost align with standard metrics for similar publication frequencies.
-
-#### Practical Implications for 30-Day Collection at 1-Second Intervals
-For the user's specific case, collecting high-resolution metrics continuously at 1-second intervals for 30 days, the setup involves configuring the CloudWatch agent with a `metrics_collection_interval` of 1 second for relevant metrics like CPU utilization. The agent will collect data every second and batch it, likely sending every 60 seconds, resulting in costs similar to standard metrics. For example, monitoring 5 containers with one CPU utilization metric each (total 5 metrics beyond the free tier):
-- Metric cost: 5 * $0.30 = $1.50 per month.
-- API requests: 5 * 43,200 = 216,000 calls, within the free tier, so no additional cost.
-- Total: $1.50 per month.
-
-For larger deployments, ensure to monitor API call volumes to avoid exceeding the free tier, especially as the number of metrics scales. The retention period ensures that 1-second data is available for the first 3 hours, suitable for real-time monitoring, with longer-term analysis possible at coarser resolutions.
 
 
-This table reflects the general pricing, with the understanding that batching by the agent minimizes API request costs, making high-resolution metrics cost-effective for typical use cases.
 
 
 ## Using CloudWatch Logs Insights for Finer Granularity
