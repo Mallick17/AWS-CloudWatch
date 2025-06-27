@@ -29,6 +29,9 @@ This documentation addresses the collection of Amazon ECS CPU utilization metric
 
 Amazon ECS provides metrics in the `AWS/ECS` namespace, including `CPUUtilization`, which measures the percentage of CPU units used by clusters or services.
 
+<details>
+  <summary>Click to View Standard ECS Metrics</summary>
+
 - **Metric Name**: `CPUUtilization`
 - **Namespace**: `AWS/ECS`
 - **Dimensions**: `ClusterName`, `ServiceName`
@@ -42,12 +45,17 @@ Amazon ECS provides metrics in the `AWS/ECS` namespace, including `CPUUtilizatio
   - 3600-second (1-hour) data points: 455 days (15 months)
 - **Cost**: Included with ECS service usage, no additional charge for standard metrics.
 
+</details>
+
 **Note**: Metrics are only sent for resources with tasks in the `RUNNING` state.
 
 ## Container Insights Metrics
 
 CloudWatch Container Insights provides detailed metrics for ECS clusters, services, tasks, and containers, available in the `ECS/ContainerInsights` namespace. These metrics are charged as custom metrics.
 
+<details>
+  <summary>Click to View Container Insights Metrics</summary>
+  
 - **Key Metrics**:
   - `TaskCpuUtilization`: CPU utilization percentage for a task.
   - `ContainerCpuUtilization`: CPU utilization percentage for a container.
@@ -59,6 +67,8 @@ CloudWatch Container Insights provides detailed metrics for ECS clusters, servic
   - 300-second data points: 63 days
   - 3600-second data points: 455 days
 - **Cost**: Charged as custom metrics. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
+
+</details>
 
 **Enhanced Observability**: Released on December 2, 2024, Container Insights with enhanced observability provides granular metrics and curated dashboards for ECS on EC2 and Fargate. However, documentation does not explicitly confirm sub-60-second resolution for these metrics.
 
