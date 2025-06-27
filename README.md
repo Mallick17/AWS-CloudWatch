@@ -120,6 +120,9 @@ To collect 1-second CPU utilization metrics for containers, deploy the CloudWatc
 ### ECS on Fargate
 Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, instrument your application to publish custom metrics with 1-second resolution.
 
+<details>
+  <summary>Click to view Fargate Serverless Configuration</summary>
+
 1. **Instrument Your Application**:
    - Use the AWS SDK (e.g., Boto3 for Python) to publish CPU utilization metrics.
    - Example Python code to publish a custom metric:
@@ -149,6 +152,8 @@ Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, in
      )
      ```
    - Ensure your application has access to CPU utilization data, which may require container runtime APIs or system calls.
+
+</details>
 
 2. **IAM Permissions**:
    - Attach an IAM role to your ECS task with permissions for `cloudwatch:PutMetricData`.
