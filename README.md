@@ -12,6 +12,57 @@ To collect CPU utilization metrics at 1-second resolution for containers running
 - **Cost**: Involves custom metric charges ($0.30/month beyond the first 10 free metrics) and API request costs ($0.01/1,000 requests beyond 1M free requests/month), mitigated by agent batching.
 
 ---
+## Amazon CloudWatch Metrics for ECS CPU Utilization
+### Standard ECS Metrics
+
+Amazon ECS provides metrics in the `AWS/ECS` namespace, including `CPUUtilization`, which measures the percentage of CPU units used by clusters or services.
+
+<details>
+  <summary>Click to View Standard ECS Metrics</summary>
+
+- **Metric Name**: `CPUUtilization`
+- **Namespace**: `AWS/ECS`
+- **Dimensions**: `ClusterName`, `ServiceName`
+- **Description**: 
+  - **Cluster-level**: Total CPU units used by ECS tasks divided by total CPU units for registered EC2 instances (EC2 launch type only).
+  - **Service-level**: Total CPU units used by tasks in the service divided by total CPU units reserved for those tasks (EC2 and Fargate).
+- **Resolution**: 1 minute
+- **Retention Period**: 
+  - 60-second data points: 15 days
+  - 300-second (5-minute) data points: 63 days
+  - 3600-second (1-hour) data points: 455 days (15 months)
+- **Cost**: Included with ECS service usage, no additional charge for standard metrics.
+
+</details>
+
+**Note**: Metrics are only sent for resources with tasks in the `RUNNING` state.
+
+### Container Insights Metrics
+
+CloudWatch Container Insights provides detailed metrics for ECS clusters, services, tasks, and containers, available in the `ECS/ContainerInsights` namespace. These metrics are charged as custom metrics.
+
+<details>
+  <summary>Click to View Container Insights Metrics</summary>
+  
+- **Key Metrics**:
+  - `TaskCpuUtilization`: CPU utilization percentage for a task.
+  - `ContainerCpuUtilization`: CPU utilization percentage for a container.
+  - Other metrics include `MemoryUtilized`, `MemoryReserved`, `NetworkRxBytes`, `NetworkTxBytes`, etc.
+- **Dimensions**: `ClusterName`, `ServiceName`, `TaskId`, `TaskDefinitionFamily`, `ContainerName`, etc.
+- **Resolution**: Likely 1 minute for aggregated metrics, though raw performance log events may allow finer granularity via CloudWatch Logs Insights.
+- **Retention Period**: 
+  - 60-second data points: 15 days
+  - 300-second data points: 63 days
+  - 3600-second data points: 455 days
+- **Cost**: Charged as custom metrics. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
+
+</details>
+
+**Enhanced Observability**: Released on December 2, 2024, Container Insights with enhanced observability provides granular metrics and curated dashboards for ECS on EC2 and Fargate. However, documentation does not explicitly confirm sub-60-second resolution for these metrics.
+
+### High-Resolution Metrics (Below 60 Seconds)
+
+To achieve 1-second data points for ECS CPU utilization, you must use high-resolution custom metrics, which have a storage resolution of 1 second. This is not available for standard ECS or Container Insights metrics, which are typically at 1-minute resolution.
 
 ## Setup Instructions for ECS on EC2
 1. **Install the CloudWatch Agent**:
@@ -172,155 +223,21 @@ For larger deployments, ensure to monitor API call volumes to avoid exceeding th
 
 ---
 
+#### Background on High-Resolution Metrics
+High-resolution metrics in Amazon CloudWatch are defined as having a granularity of 1 second, compared to the standard 1-minute resolution for metrics produced by AWS services. When publishing custom metrics, users can specify either standard or high resolution by setting the `StorageResolution` parameter to 1 in the PutMetricData API request, enabling storage and retrieval at 1-second intervals ([Publish custom metrics - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html)). This is particularly useful for monitoring dynamic environments where rapid changes, such as ECS CPU utilization, need immediate visibility.
+
+---
 ## Additional Notes
 - **Monitoring Costs**: Regularly check CloudWatch usage in the AWS Billing Dashboard to ensure API calls stay within the free tier, especially for larger deployments.
 - **Enhanced Observability**: Container Insights with enhanced observability (released December 2, 2024) offers detailed dashboards but does not guarantee sub-60-second resolution without custom setup.
 - **Logs Insights Alternative**: For raw data, query performance logs in `/aws/ecs/containerinsights/ClusterName/performance` via CloudWatch Logs Insights, though this is typically at 5–10-second intervals, not 1-second metrics.
 
-<details>
-  <summary>This setup provides granular CPU utilization monitoring for ECS on EC2, balancing high-resolution visibility with manageable costs through agent batching.</summary>
 
-```json
-{
-  "metrics": {
-    "append_dimensions": {
-      "InstanceId": "${aws:InstanceId}"
-    },
-    "metrics_collected": {
-      "docker": {
-        "measurement": [
-          "cpu_usage"
-        ],
-        "metrics_collection_interval": 1
-      }
-    }
-  }
-}
-```
-
-</details>
 
 
 
 <details>
-  <summary>Detailed Observation</summary>
-
-
-### Overview
-
-
-### Setup for ECS on EC2
-To collect 1-second CPU utilization metrics for containers in ECS on EC2, deploy the CloudWatch Agent on your EC2 instances and configure it to collect Docker metrics at a 1-second interval. This setup publishes high-resolution custom metrics to CloudWatch.
-
-### Setup for ECS on Fargate
-Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, instrument your application to publish custom metrics using the AWS SDK, specifying a 1-second storage resolution.
-
-
-# Amazon CloudWatch Metrics for ECS CPU Utilization
-
-This documentation addresses the collection of Amazon ECS CPU utilization metrics in CloudWatch, focusing on achieving 1-second data points, including setup instructions, retention periods, and pricing details.
-
-## Standard ECS Metrics
-
-Amazon ECS provides metrics in the `AWS/ECS` namespace, including `CPUUtilization`, which measures the percentage of CPU units used by clusters or services.
-
-<details>
-  <summary>Click to View Standard ECS Metrics</summary>
-
-- **Metric Name**: `CPUUtilization`
-- **Namespace**: `AWS/ECS`
-- **Dimensions**: `ClusterName`, `ServiceName`
-- **Description**: 
-  - **Cluster-level**: Total CPU units used by ECS tasks divided by total CPU units for registered EC2 instances (EC2 launch type only).
-  - **Service-level**: Total CPU units used by tasks in the service divided by total CPU units reserved for those tasks (EC2 and Fargate).
-- **Resolution**: 1 minute
-- **Retention Period**: 
-  - 60-second data points: 15 days
-  - 300-second (5-minute) data points: 63 days
-  - 3600-second (1-hour) data points: 455 days (15 months)
-- **Cost**: Included with ECS service usage, no additional charge for standard metrics.
-
-</details>
-
-**Note**: Metrics are only sent for resources with tasks in the `RUNNING` state.
-
-## Container Insights Metrics
-
-CloudWatch Container Insights provides detailed metrics for ECS clusters, services, tasks, and containers, available in the `ECS/ContainerInsights` namespace. These metrics are charged as custom metrics.
-
-<details>
-  <summary>Click to View Container Insights Metrics</summary>
-  
-- **Key Metrics**:
-  - `TaskCpuUtilization`: CPU utilization percentage for a task.
-  - `ContainerCpuUtilization`: CPU utilization percentage for a container.
-  - Other metrics include `MemoryUtilized`, `MemoryReserved`, `NetworkRxBytes`, `NetworkTxBytes`, etc.
-- **Dimensions**: `ClusterName`, `ServiceName`, `TaskId`, `TaskDefinitionFamily`, `ContainerName`, etc.
-- **Resolution**: Likely 1 minute for aggregated metrics, though raw performance log events may allow finer granularity via CloudWatch Logs Insights.
-- **Retention Period**: 
-  - 60-second data points: 15 days
-  - 300-second data points: 63 days
-  - 3600-second data points: 455 days
-- **Cost**: Charged as custom metrics. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
-
-</details>
-
-**Enhanced Observability**: Released on December 2, 2024, Container Insights with enhanced observability provides granular metrics and curated dashboards for ECS on EC2 and Fargate. However, documentation does not explicitly confirm sub-60-second resolution for these metrics.
-
-## High-Resolution Metrics (Below 60 Seconds)
-
-To achieve 1-second data points for ECS CPU utilization, you must use high-resolution custom metrics, which have a storage resolution of 1 second. This is not available for standard ECS or Container Insights metrics, which are typically at 1-minute resolution.
-
-### Retention Period for High-Resolution Metrics
-- **1-second to 30-second periods**: Retained for 3 hours.
-- **Aggregated to 60-second periods**: Retained for 15 days.
-- **Further aggregations**: 300-second data points for 63 days, 3600-second data points for 455 days.
-
-### Pricing for High-Resolution Metrics
-- High-resolution custom metrics incur higher charges than standard metrics.
-- **Cost Example**: Based on CloudWatch pricing, custom metrics are approximately $0.30 per metric per month, with high-resolution metrics (1-second to 30-second periods) charged at a higher rate due to increased data points.
-- Refer to [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/) for detailed pricing.
-
-## Setup for 1-Second CPU Utilization Metrics
-
-### ECS on EC2
-To collect 1-second CPU utilization metrics for containers, deploy the CloudWatch Agent on EC2 instances hosting your ECS cluster.
-
-1. **Install the CloudWatch Agent**:
-   - Follow the [installation guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html) to install the agent on your EC2 instances.
-   - Ensure the EC2 instances have the necessary IAM permissions, including `cloudwatch:PutMetricData` and `logs:PutLogEvents`.
-
-2. **Configure the Agent**:
-   - Create or edit the CloudWatch Agent configuration file (e.g., `/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json`).
-   - Include the `docker` plugin to collect container metrics with a 1-second interval.
-   - Example configuration:
-     ```json
-     {
-       "metrics": {
-         "append_dimensions": {
-           "InstanceId": "${aws:InstanceId}"
-         },
-         "metrics_collected": {
-           "docker": {
-             "measurement": [
-               "cpu_usage",
-               "memory_usage"
-             ],
-             "metrics_collection_interval": 1
-           }
-         }
-       }
-     }
-     ```
-   - Use the [configuration wizard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create-cloudwatch-agent-configuration-file-wizard.html) or manually edit the JSON file.
-
-3. **Start the Agent**:
-   - Start the CloudWatch Agent service: `sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/path/to/config.json -s`.
-   - The agent publishes metrics to CloudWatch in the `CWAgent` namespace with a storage resolution of 1 second.
-
-4. **Verify Metrics**:
-   - In the CloudWatch console, navigate to Metrics > All metrics > CWAgent to view the `cpu_usage` metric for containers.
-   - Metrics are available with periods of 1, 5, 10, 30 seconds, or multiples of 60 seconds.
+  <summary>ECS on Fargate & CloudWatch Logs Insights for Finer Granularity & Key Citations</summary>
 
 ### ECS on Fargate
 Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, instrument your application to publish custom metrics with 1-second resolution.
@@ -368,33 +285,10 @@ Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, in
    - Select a 1-second period to view high-resolution data points.
 
 
-### Key Points
-- It seems likely that 1-second data points for high-resolution metrics are retained for 3 hours, then aggregated to 1-minute for 15 days, 5-minute for 63 days, and 1-hour for 15 months.
-- Research suggests the cost is $0.30 per metric per month beyond the first 10 free metrics, with API requests typically free for small setups.
-
-### Retention Period
-High-resolution metrics with 1-second data points are retained for 3 hours at that resolution. After 3 hours, the data is aggregated to 1-minute resolution and kept for 15 days, then to 5-minute resolution for 63 days, and finally to 1-hour resolution for 455 days (15 months). This ensures you can access detailed data shortly after collection and longer-term trends later.
-
-### Cost Calculation
-For collecting high-resolution metrics continuously at 1-second intervals over 30 days, the cost depends on the number of metrics. The first 10 custom metrics are free each month. For each additional metric, you pay $0.30 per month. API request costs are usually covered within the free tier for a small number of metrics, but for large setups, extra charges may apply if exceeding 1,000,000 requests monthly.
-
 ---
-
-### Survey Note: Detailed Analysis of High-Resolution Metrics Retention and Cost for 30 Days at 1-Second Intervals
-#### Background on High-Resolution Metrics
-High-resolution metrics in Amazon CloudWatch are defined as having a granularity of 1 second, compared to the standard 1-minute resolution for metrics produced by AWS services. When publishing custom metrics, users can specify either standard or high resolution by setting the `StorageResolution` parameter to 1 in the PutMetricData API request, enabling storage and retrieval at 1-second intervals ([Publish custom metrics - Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html)). This is particularly useful for monitoring dynamic environments where rapid changes, such as ECS CPU utilization, need immediate visibility.
-
-For the user's scenario, collecting metrics continuously at 1-second intervals over 30 days implies using the CloudWatch agent or direct API calls to publish high-resolution custom metrics, with the agent typically batching data to optimize costs.
-
-
-
-
 
 ## Using CloudWatch Logs Insights for Finer Granularity
 Container Insights collects performance log events in a structured JSON format, stored in the `/aws/ecs/containerinsights/ClusterName/performance` log group. These logs may contain CPU utilization data at a finer granularity (e.g., 5 or 10 seconds), depending on the collection frequency.
-
-<details>
-  <summary>Click to View to Examples and Steps</summary>
 
 - **Query Example**:
   ```plaintext
@@ -409,39 +303,7 @@ Container Insights collects performance log events in a structured JSON format, 
   3. Select the `/aws/ecs/containerinsights/ClusterName/performance` log group.
   4. Run a query to extract CPU utilization data, specifying a time range (e.g., 1 minute) to approximate 1-second granularity if log events are frequent.
 
-</details>
-
 **Note**: The exact frequency of log events is not explicitly documented but is typically 5–10 seconds. This approach provides raw data rather than aggregated metrics, which may not fully meet the requirement for CloudWatch metrics at 1-second resolution.
-
-## Limitations
-- **Fargate**: No direct support for high-resolution metrics without custom application instrumentation.
-- **Cost**: High-resolution metrics increase costs due to higher data point frequency.
-- **Retention**: Limited to 3 hours for 1-second data points, requiring timely analysis or export.
-
-## Recommendations
-- For **ECS on EC2**, use the CloudWatch Agent with a 1-second collection interval for container-level CPU metrics.
-- For **ECS on Fargate**, implement custom metric publishing within your application.
-- Use Container Insights with enhanced observability for detailed dashboards and consider querying performance logs for finer-grained data.
-- Monitor costs closely, as high-resolution metrics can significantly increase CloudWatch expenses.
-
-## Pricing Details
-The following table summarizes CloudWatch pricing relevant to ECS metrics:
-
-| **Metric Type**            | **Cost**                              | **Notes**                                                                 |
-|----------------------------|---------------------------------------|---------------------------------------------------------------------------|
-| Standard ECS Metrics        | Free                                  | Included with ECS service usage.                                          |
-| Container Insights Metrics  | ~$0.30 per metric per month           | Charged as custom metrics; varies by region.                               |
-| High-Resolution Metrics     | Higher than standard custom metrics   | Charged per `PutMetricData` call; see [pricing page](https://aws.amazon.com/cloudwatch/pricing/). |
-| Logs Insights Queries       | Varies based on data scanned          | Charged per GB of data scanned; see [pricing page](https://aws.amazon.com/cloudwatch/pricing/). |
-
-## Conclusion
-Achieving 1-second data points for ECS CPU utilization requires custom solutions:
-- **ECS on EC2**: Configure the CloudWatch Agent to collect container metrics at 1-second intervals.
-- **ECS on Fargate**: Publish custom metrics from your application using the AWS SDK.
-Standard ECS and Container Insights metrics are at 1-minute resolution, but performance logs may offer finer granularity via CloudWatch Logs Insights. Be mindful of the 3-hour retention period for high-resolution metrics and the associated costs.
-
-In conclusion, for collecting high-resolution metrics at 1-second intervals continuously over 30 days, the retention period for 1-second data points is 3 hours, with subsequent aggregation to 1-minute for 15 days, 5-minute for 63 days, and 1-hour for 15 months. The cost is primarily driven by the per-metric charge of $0.30 per month beyond the first 10 free metrics, with API request costs typically covered by the 1,000,000 free calls monthly due to batching. For ECS CPU utilization, users can expect costs to align with standard custom metrics, provided the agent is configured to batch effectively. Always monitor usage to ensure API calls remain within the free tier for cost efficiency, especially for large-scale deployments.
-
 
 ### Key Citations
 - [Monitor Amazon ECS using CloudWatch](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html)
