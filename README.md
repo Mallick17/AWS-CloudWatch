@@ -1,230 +1,226 @@
-# Amazon CloudWatch
-- Amazon CloudWatch is a monitoring and observation service that is built for DevOps Engineers, developers, security engineers and IT managers.
-- CloudWatch provides you with data and actionable insights to monitor your applications, respond to system-wide performance changes, and optimize resource utilization. You get a unified view of operational health.
----
+### Key Points
+- **Standard ECS Metrics**: The `CPUUtilization` metric for Amazon ECS clusters and services is available at a 1-minute resolution in CloudWatch.
+- **Container Insights**: Provides task and container-level metrics, likely at 1-minute resolution, but raw log data may allow finer granularity via CloudWatch Logs Insights.
+- **High-Resolution Metrics**: To achieve 1-second data points for ECS CPU utilization, custom metrics must be published, or for ECS on EC2, the CloudWatch Agent can be configured to collect container metrics at 1-second intervals.
+- **ECS on Fargate Limitation**: High-resolution metrics are not directly available; custom metrics from applications are required.
+- **Retention and Cost**: High-resolution metrics (below 60 seconds) are retained for 3 hours and incur higher costs compared to standard metrics.
 
-## CloudWatch Logs
+### Overview
+Amazon CloudWatch collects metrics for Amazon ECS, including `CPUUtilization`, at a standard 1-minute resolution. To obtain 1-second data points for ECS CPU utilization, you can use high-resolution custom metrics. For ECS on EC2, this can be achieved by configuring the CloudWatch Agent to collect container metrics at 1-second intervals. For ECS on Fargate, you must publish custom metrics from your application. High-resolution metrics are retained for 3 hours and come with additional costs.
 
-**Overview and Fundamentals:**
-Amazon CloudWatch Logs enables monitoring, storing, and accessing log files from AWS resources such as Amazon EC2 instances, AWS Lambda functions, and AWS CloudTrail. It centralizes logs from systems, applications, and AWS services in a scalable service, offering features for viewing, searching, filtering, archiving logs securely, and querying with a powerful query language. Logs are divided into two classes: Standard (full features) and Infrequent Access (lower ingestion charges, subset of Standard capabilities). For details, see [What is Amazon CloudWatch Logs?](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html).
+### Setup for ECS on EC2
+To collect 1-second CPU utilization metrics for containers in ECS on EC2, deploy the CloudWatch Agent on your EC2 instances and configure it to collect Docker metrics at a 1-second interval. This setup publishes high-resolution custom metrics to CloudWatch.
 
-**Creating and Configuring Log Groups:**
+### Setup for ECS on Fargate
+Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, instrument your application to publish custom metrics using the AWS SDK, specifying a 1-second storage resolution.
 
-- **Creation Methods:** Log groups can be created via the AWS Management Console, AWS CLI, or during CloudWatch Logs agent installation on EC2 instances. To create via console, navigate to [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/), select Log groups, choose Actions > Create log group, enter a name, and create. CLI command example: `aws logs create-log-group --log-group-name MyLogGroup`.
-- **Retention Settings:** Default retention is indefinite, adjustable between 10 years and 1 day. Change via console: Select log group, choose Actions > Edit retention setting, set period (e.g., 30 days). Takes up to 72 hours for log events to delete after reaching retention.
-- **Tagging:** Add tags during creation or later, with a maximum of 50 tags per log group. Use AWS CLI commands like `aws logs tag-resource` for tagging, with key restrictions (1-128 Unicode characters, values 0-255, cannot start with "aws:"). See [Working with log groups and log streams](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html) for CLI and API details.
-
-**Setting Up Log Streams:**
-
-- A log stream is a sequence of log events sharing the same source, belonging to one log group, with no limit on the number of streams per group. Automatically received from AWS services or sent using methods like the CloudWatch Logs agent or SDKs. For EC2, install the agent as an RPM (e.g., `sudo yum install -y awslogs` for Amazon Linux), ensuring logs are sent to the specified log stream.
-
-**Searching and Filtering Log Data:**
-
-- **Console Search:** View logs by navigating to [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/), selecting Log groups, choosing a group and stream, and using the search field for filtering. Specify time ranges (Absolute or Relative, e.g., last 24 hours) and switch between UTC and local time zone.
-- **CloudWatch Logs Insights:** Use for interactive search and analysis, with a query language, sample queries, autocompletion, and field discovery. Create field indexes to improve query performance and reduce scan volume. Use Live Tail for near real-time viewing, filtering, and highlighting of ingested logs. See [Analyzing log data with CloudWatch Logs Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html) for query examples.
-
-**Example:**
-To create a log group with 30-day retention using AWS CLI:
-```bash
-aws logs create-log-group --log-group-name MyLogGroup --retention-in-days 30
-```
+### Pricing and Retention
+High-resolution metrics (1-second data points) are retained for 3 hours before being aggregated to 1-minute periods. These metrics incur higher charges than standard metrics. Check the [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/) page for details.
 
 ---
 
-## CloudWatch Metrics
-**Overview and Concepts:**
-CloudWatch Metrics are time-ordered data points representing the performance of AWS systems, kept for 15 months for historical analysis. Default metrics are provided free for resources like EC2 instances, EBS volumes, and RDS DB instances, with options for detailed monitoring or publishing custom metrics. See [Metrics in Amazon CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html).
-
-**AWS Services Supported by CloudWatch Metrics:**
-
-A comprehensive list includes services like AWS Amplify, Amazon API Gateway, Amazon Aurora (under AWS/RDS namespace), and many others. Below is a partial table for clarity:
-
-| Service                              | Namespace                          | Documentation                                                                 |
-|--------------------------------------|------------------------------------|------------------------------------------------------------------------------|
-| Amazon EC2                           | AWS/EC2                            | [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html) |
-| Amazon RDS                           | AWS/RDS                            | [https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMySQL.Monitoring.Metrics.html](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMySQL.Monitoring.Metrics.html) |
-| Amazon S3                            | AWS/S3                             | [https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-monitoring.html](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cloudwatch-monitoring.html) |
-| AWS Lambda                           | AWS/Lambda                         | [https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html) |
-
-For a complete list, refer to [AWS services that publish CloudWatch metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html).
-
-**Custom Metrics:**
-Publish custom metrics as standard (1-minute resolution) or high resolution (1-second, higher charge). Use `aws cloudwatch put-metric-data` for CLI, e.g.:
-```bash
-aws cloudwatch put-metric-data --namespace MyNamespace --metric-name MyMetric --value 42
-```
 
 
-## CloudWatch Alarms: States, Thresholds, and Actions
-**Overview and Alarm States:**
-CloudWatch Alarms monitor a single metric or expression, with possible states: `OK` (within threshold), `ALARM` (outside threshold), `INSUFFICIENT_DATA` (alarm just started, metric unavailable, or insufficient data). See [Using Amazon CloudWatch alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html).
+# Amazon CloudWatch Metrics for ECS CPU Utilization
 
-**Setting Thresholds:**
+This documentation addresses the collection of Amazon ECS CPU utilization metrics in CloudWatch, focusing on achieving 1-second data points, including setup instructions, retention periods, and pricing details.
 
-- **Period:** Length of time (seconds) to evaluate metric/expression for each data point, e.g., 300 seconds (5 minutes). For high-resolution alarms, can be 10s, 20s, 30s (higher charge); regular alarms use multiples of 60s.
-- **Evaluation Periods:** Number of recent periods/data points to evaluate, e.g., 2 periods.
-- **Datapoints to Alarm:** Number of breaching data points within Evaluation Periods to trigger `ALARM`, not consecutive, must be within last Evaluation Periods. For periods ≥1 minute, evaluated every minute; multi-day alarms (>1 day) evaluated hourly.
-- **Percentile Alarms:** Setting used when <10/(1-percentile) data points for percentiles 0.5–1.0, or <10/percentile for 0–0.5, e.g., <1000 samples for p99.
+## Standard ECS Metrics
 
-**Actions:**
+Amazon ECS provides metrics in the `AWS/ECS` namespace, including `CPUUtilization`, which measures the percentage of CPU units used by clusters or services.
 
-- Triggered on state transitions (except Auto Scaling, invoked once/minute in new state). Supported actions include sending Amazon SNS notifications, EC2 actions (stop, terminate, reboot, recover), Auto Scaling actions, starting Amazon Q investigations, and creating Systems Manager OpsItems/incidents.
-- Composite alarms can send SNS notifications, create investigations/OpsItems/incidents, but not EC2/Auto Scaling actions.
-- Lambda actions are asynchronous, with retries if failed; require resource policy (e.g., CLI: `aws lambda add-permission` with principal `lambda.alarms.cloudwatch.amazonaws.com`).
-- EventBridge integration: Alarms emit events, trigger actions; see [What is Amazon EventBridge?](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html).
-- Missing data treatment options: `notBreaching`, `breaching`, `ignore`, `missing` (default `missing`); DynamoDB metrics always ignore missing data.
+- **Metric Name**: `CPUUtilization`
+- **Namespace**: `AWS/ECS`
+- **Dimensions**: `ClusterName`, `ServiceName`
+- **Description**: 
+  - **Cluster-level**: Total CPU units used by ECS tasks divided by total CPU units for registered EC2 instances (EC2 launch type only).
+  - **Service-level**: Total CPU units used by tasks in the service divided by total CPU units reserved for those tasks (EC2 and Fargate).
+- **Resolution**: 1 minute
+- **Retention Period**: 
+  - 60-second data points: 15 days
+  - 300-second (5-minute) data points: 63 days
+  - 3600-second (1-hour) data points: 455 days (15 months)
+- **Cost**: Included with ECS service usage, no additional charge for standard metrics.
 
-**Example:**
-Create an alarm for high CPU utilization:
-```bash
-aws cloudwatch put-metric-alarm --alarm-name HighCPUAlarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 300 --threshold 80 --comparison-operator GreaterThanThreshold --dimensions Name=InstanceId,Value=i-1234567890abcdef0 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:123456789012:MyTopic
-```
+**Note**: Metrics are only sent for resources with tasks in the `RUNNING` state.
 
-#### CloudWatch Events (Amazon EventBridge): Targets and Actions
+## Container Insights Metrics
 
-**Overview and Fundamentals:**
-Amazon EventBridge, formerly CloudWatch Events, is a serverless event bus service for connecting applications using events, enabling event-driven architectures. Events represent state changes or occurrences, routed via rules to targets. See [What Is Amazon EventBridge?](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html).
+CloudWatch Container Insights provides detailed metrics for ECS clusters, services, tasks, and containers, available in the `ECS/ContainerInsights` namespace. These metrics are charged as custom metrics.
 
-**Targets and Actions for Event Rules:**
+- **Key Metrics**:
+  - `TaskCpuUtilization`: CPU utilization percentage for a task.
+  - `ContainerCpuUtilization`: CPU utilization percentage for a container.
+  - Other metrics include `MemoryUtilized`, `MemoryReserved`, `NetworkRxBytes`, `NetworkTxBytes`, etc.
+- **Dimensions**: `ClusterName`, `ServiceName`, `TaskId`, `TaskDefinitionFamily`, `ContainerName`, etc.
+- **Resolution**: Likely 1 minute for aggregated metrics, though raw performance log events may allow finer granularity via CloudWatch Logs Insights.
+- **Retention Period**: 
+  - 60-second data points: 15 days
+  - 300-second data points: 63 days
+  - 3600-second data points: 455 days
+- **Cost**: Charged as custom metrics. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
 
-- **Event Rules:** Specify what EventBridge does with events delivered to event buses. Two types: match on event data (event pattern) or run on schedule. Event pattern defines structure and fields to match, e.g., EC2 state changes. Schedule rules use cron or rate expressions, now recommended via EventBridge Scheduler for scalability. See [Creating rules that react to events in Amazon EventBridge](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule.html).
-- **Targets:** Event buses deliver to zero or more targets; Pipes deliver to a single target. Common targets include AWS Lambda functions, Amazon SQS queues, Amazon SNS topics, and more. Pipes support advanced transformations and enrichment prior to delivery.
-- **Actions:** Actions are the invocation of targets, such as running a Lambda function, sending an SNS notification, or triggering an SQS message. EventBridge can create necessary IAM roles for permissions, e.g., for Lambda targets.
+**Enhanced Observability**: Released on December 2, 2024, Container Insights with enhanced observability provides granular metrics and curated dashboards for ECS on EC2 and Fargate. However, documentation does not explicitly confirm sub-60-second resolution for these metrics.
 
-**Example:**
-Create a rule to trigger Lambda on EC2 state change:
-```bash
-aws events put-rule --name EC2StateChangeRule --event-pattern "{\"source\":[\"aws.ec2\"],\"detail-type\":[\"EC2 Instance State-change Notification\"]}"
-aws events put-targets --rule EC2StateChangeRule --targets "Id"="1","Arn"="arn:aws:lambda:us-east-1:123456789012:function:MyFunction"
-```
+## High-Resolution Metrics (Below 60 Seconds)
 
----
+To achieve 1-second data points for ECS CPU utilization, you must use high-resolution custom metrics, which have a storage resolution of 1 second. This is not available for standard ECS or Container Insights metrics, which are typically at 1-minute resolution.
 
-## Pricing
+### Retention Period for High-Resolution Metrics
+- **1-second to 30-second periods**: Retained for 3 hours.
+- **Aggregated to 60-second periods**: Retained for 15 days.
+- **Further aggregations**: 300-second data points for 63 days, 3600-second data points for 455 days.
 
-CloudWatch pricing is usage-based, with a free tier for initial usage. Details include:
+### Pricing for High-Resolution Metrics
+- High-resolution custom metrics incur higher charges than standard metrics.
+- **Cost Example**: Based on CloudWatch pricing, custom metrics are approximately $0.30 per metric per month, with high-resolution metrics (1-second to 30-second periods) charged at a higher rate due to increased data points.
+- Refer to [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/) for detailed pricing.
 
-- **Metrics:** Free for basic metrics from AWS services; custom metrics cost per metric per month, with high-resolution metrics (1-second) incurring higher charges. See [Publish custom metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html).
-- **Logs:** Charges based on data ingested (GB), archived (GB-month), and analyzed (queries). Standard logs have full features; Infrequent Access logs lower ingestion charges. See [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/).
-- **Alarms:** Cost per alarm per month, with a free tier limit. High-resolution alarms (10s, 30s periods) have additional charges.
-- **Dashboards:** Per dashboard per month for viewing metrics, with charges for API requests and data transfer.
-- **Events:** Charges based on events published, rules invoked, and targets processed, with EventBridge Scheduler costs for scheduled invocations.
+## Setup for 1-Second CPU Utilization Metrics
 
-For exact rates, consult the [AWS CloudWatch Pricing page](https://aws.amazon.com/cloudwatch/pricing/).
+### ECS on EC2
+To collect 1-second CPU utilization metrics for containers, deploy the CloudWatch Agent on EC2 instances hosting your ECS cluster.
+
+1. **Install the CloudWatch Agent**:
+   - Follow the [installation guide](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html) to install the agent on your EC2 instances.
+   - Ensure the EC2 instances have the necessary IAM permissions, including `cloudwatch:PutMetricData` and `logs:PutLogEvents`.
+
+2. **Configure the Agent**:
+   - Create or edit the CloudWatch Agent configuration file (e.g., `/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json`).
+   - Include the `docker` plugin to collect container metrics with a 1-second interval.
+   - Example configuration:
+     ```json
+     {
+       "metrics": {
+         "append_dimensions": {
+           "InstanceId": "${aws:InstanceId}"
+         },
+         "metrics_collected": {
+           "docker": {
+             "measurement": [
+               "cpu_usage",
+               "memory_usage"
+             ],
+             "metrics_collection_interval": 1
+           }
+         }
+       }
+     }
+     ```
+   - Use the [configuration wizard](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/create-cloudwatch-agent-configuration-file-wizard.html) or manually edit the JSON file.
+
+3. **Start the Agent**:
+   - Start the CloudWatch Agent service: `sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/path/to/config.json -s`.
+   - The agent publishes metrics to CloudWatch in the `CWAgent` namespace with a storage resolution of 1 second.
+
+4. **Verify Metrics**:
+   - In the CloudWatch console, navigate to Metrics > All metrics > CWAgent to view the `cpu_usage` metric for containers.
+   - Metrics are available with periods of 1, 5, 10, 30 seconds, or multiples of 60 seconds.
+
+### ECS on Fargate
+Since Fargate is serverless, you cannot deploy the CloudWatch Agent. Instead, instrument your application to publish custom metrics with 1-second resolution.
+
+1. **Instrument Your Application**:
+   - Use the AWS SDK (e.g., Boto3 for Python) to publish CPU utilization metrics.
+   - Example Python code to publish a custom metric:
+     ```python
+     import boto3
+     from datetime import datetime
+
+     def get_cpu_utilization():
+         # Implement logic to retrieve CPU utilization (e.g., from container runtime or application)
+         return 75.0  # Placeholder value
+
+     cloudwatch = boto3.client('cloudwatch')
+
+     cloudwatch.put_metric_data(
+         Namespace='MyCustomMetrics',
+         MetricData=[{
+             'MetricName': 'CPUUtilization',
+             'Dimensions': [
+                 {'Name': 'TaskId', 'Value': 'your-task-id'},
+                 {'Name': 'ClusterName', 'Value': 'your-cluster-name'}
+             ],
+             'Timestamp': datetime.utcnow(),
+             'Value': get_cpu_utilization(),
+             'Unit': 'Percent',
+             'StorageResolution': 1
+         }]
+     )
+     ```
+   - Ensure your application has access to CPU utilization data, which may require container runtime APIs or system calls.
+
+2. **IAM Permissions**:
+   - Attach an IAM role to your ECS task with permissions for `cloudwatch:PutMetricData`.
+
+3. **Verify Metrics**:
+   - In the CloudWatch console, navigate to Metrics > All metrics > MyCustomMetrics to view the `CPUUtilization` metric.
+   - Select a 1-second period to view high-resolution data points.
+
+## Using CloudWatch Logs Insights for Finer Granularity
+Container Insights collects performance log events in a structured JSON format, stored in the `/aws/ecs/containerinsights/ClusterName/performance` log group. These logs may contain CPU utilization data at a finer granularity (e.g., 5 or 10 seconds), depending on the collection frequency.
+
+- **Query Example**:
+  ```plaintext
+  fields @timestamp, CpuUtilized, TaskId
+  | filter Type = "Task"
+  | sort @timestamp desc
+  | limit 100
+  ```
+- **Steps**:
+  1. Open the CloudWatch console at [https://console.aws.amazon.com/cloudwatch/](https://console.aws.amazon.com/cloudwatch/).
+  2. Navigate to Logs > Logs Insights.
+  3. Select the `/aws/ecs/containerinsights/ClusterName/performance` log group.
+  4. Run a query to extract CPU utilization data, specifying a time range (e.g., 1 minute) to approximate 1-second granularity if log events are frequent.
+
+**Note**: The exact frequency of log events is not explicitly documented but is typically 5–10 seconds. This approach provides raw data rather than aggregated metrics, which may not fully meet the requirement for CloudWatch metrics at 1-second resolution.
+
+## Limitations
+- **Fargate**: No direct support for high-resolution metrics without custom application instrumentation.
+- **Cost**: High-resolution metrics increase costs due to higher data point frequency.
+- **Retention**: Limited to 3 hours for 1-second data points, requiring timely analysis or export.
+
+## Recommendations
+- For **ECS on EC2**, use the CloudWatch Agent with a 1-second collection interval for container-level CPU metrics.
+- For **ECS on Fargate**, implement custom metric publishing within your application.
+- Use Container Insights with enhanced observability for detailed dashboards and consider querying performance logs for finer-grained data.
+- Monitor costs closely, as high-resolution metrics can significantly increase CloudWatch expenses.
+
+## Pricing Details
+The following table summarizes CloudWatch pricing relevant to ECS metrics:
+
+| **Metric Type**            | **Cost**                              | **Notes**                                                                 |
+|----------------------------|---------------------------------------|---------------------------------------------------------------------------|
+| Standard ECS Metrics        | Free                                  | Included with ECS service usage.                                          |
+| Container Insights Metrics  | ~$0.30 per metric per month           | Charged as custom metrics; varies by region.                               |
+| High-Resolution Metrics     | Higher than standard custom metrics   | Charged per `PutMetricData` call; see [pricing page](https://aws.amazon.com/cloudwatch/pricing/). |
+| Logs Insights Queries       | Varies based on data scanned          | Charged per GB of data scanned; see [pricing page](https://aws.amazon.com/cloudwatch/pricing/). |
+
+## Conclusion
+Achieving 1-second data points for ECS CPU utilization requires custom solutions:
+- **ECS on EC2**: Configure the CloudWatch Agent to collect container metrics at 1-second intervals.
+- **ECS on Fargate**: Publish custom metrics from your application using the AWS SDK.
+Standard ECS and Container Insights metrics are at 1-minute resolution, but performance logs may offer finer granularity via CloudWatch Logs Insights. Be mindful of the 3-hour retention period for high-resolution metrics and the associated costs.
 
 
----
 
-## Terraform with CloudWatch
-
-**Overview:**
-Terraform, an infrastructure as code tool, enables programmatic management of CloudWatch resources. Use the AWS provider for resources like `aws_cloudwatch_log_group`, `aws_cloudwatch_metric_alarm`, and `aws_cloudwatch_event_rule`. See [Terraform AWS Provider documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs).
-
-**Examples:**
-
-- **Log Group:**
-```hcl
-resource "aws_cloudwatch_log_group" "example" {
-  name              = "MyLogGroup"
-  retention_in_days = 30
-}
-```
-- **Metric Alarm:**
-```hcl
-resource "aws_cloudwatch_metric_alarm" "example" {
-  alarm_name          = "HighCPUAlarm"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 300
-  statistic           = "Average"
-  threshold           = 80
-  alarm_description   = "This alarm monitors EC2 CPU utilization"
-  dimensions = {
-    InstanceId = "i-1234567890abcdef0"
-  }
-  alarm_actions = ["arn:aws:sns:us-east-1:123456789012:MyTopic"]
-}
-```
-- **Event Rule:** Similar to CLI, define rules and targets in HCL for consistency and versioning.
-
-Best practices include avoiding hardcoded values, using variables for dynamic configurations, and regularly updating Terraform versions for compatibility.
-
----
-
-### What problem does CloudWatch solve?
-Amazon CloudWatch solves the problem of responding to events and alarms, as they occur in your architecture. 
-- Amazon CloudWatch collects monitoring and operational data in the form of logs, metrices, and events. It provides you with a unified view of AWS resources, applications and services that run on AWS and on-premises servers.
-- You can use CloudWatch to detect anomalous behaviour in your environments, set alarms, and visualize logs and metrics side by side. Use it to take automated actions, toubleshoot issues, and discover insights to keep your applicatipns running smoothly.
-
-### Benefits of CloudWatch
-- You can use CloudWatch to collect metrics and logs from all your AWS resources, applications, and services that run on AWS and on-premises servers. You can monitor them from one platform.
-- You can use CloudWatch to maintain visibility across your services, applications, and infrastructure, so you can visualize key metrics like CPU utilization and memory.
-- You can use CloudWatch to set alarms and take automated actions. It frees up important resources so you can focus on adding business value.
-
-### How can I architect a cloud solution using CloudWatch?
-We can architect a solution by using Amazon CloudWatch to monitor the CPU utilization and take action.
-
-![image](https://github.com/user-attachments/assets/9b13e2f4-68d0-46fb-b4ae-2f3e49bc4fe4)
-
-- In the diagram, CloudWatch receives data on the EC2 instance CPU utilization. When the CPU goes over a specified percent, CloudWatch triggers Amazon EC2 Auto Scaling to provision an additional instance to help with the workload. Therefore, the first instance isn’t overloaded.
-
-### How can I use CLoudWatch?
-1. **Application Monitoring**
-   - CloudWatch can monitor your applications that run on AWS (on Amazon EC2, containers, and serverless) or on-premises. CloudWatch collects data at every layer of the performance stack, including metrics and logs on automatic dashboards.  
-
-2. **Proactive Resource Optimization**
-   - CloudWatch alarms watch your metric values against thresholds that you specify, or that CloudWatch creates by using machine learning models to detect anomalous behavior. For example, if an alarm is triggered, CloudWatch can take action automatically to enable Amazon EC2 Auto Scaling or stop an instance. In this way, you can automate capacity and resource planning.  
-
-3. **Infrastructure Monitoring and Troubleshooting**:  
-   - You can use CloudWatch to monitor key metrics and logs, visualize your application and infrastructure stack, and create alarms. It correlates metrics and logs to understand and resolve the root cause of performance issues in your AWS resources.  
-
-### What else should I keep in Mind when using CloudWatch?
-Some services provide basic CloudWatch monitoring at no additional charge with the option to upgrade to detailed monitoring, which comes with a charge.
-
-For example, EC2 instances, by default, are enabled with basic CloudWatch monitoring. Thus, data is available automatically in 5-minute periods. If you decide to upgrade to detailed CloudWatch monitoring on your instances, data is available in 1-minute periods instead of 5-minute periods.
-
-### How much does CloudWatch cost?
-Amazon CloudWatch does not require an upfront commitment or minimum fee; you pay for what you use. You are charged at the end of the month for your usage.
-
-Amazon CloudWatch charges you for alarms, custom events, metrics collection, and dashboards that you set up. However, you can get started with Amazon CloudWatch for free. Most AWS services (Amazon EC2, Amazon S3, Amazon Kinesis, and others) send metrics automatically for free to CloudWatch. Many applications should be able to operate within these free tier limits.
-
-<details>
-   <summary>Additional AWS Services and Their Use Cases in CloudWatch</summary>
-
-### Additional AWS Services and Their Use Cases
-
-1. **Amazon Simple Queue Service (SQS):**
-   - **Use Case:** Queue alarm notifications for processing by other applications.
-   - **Integration:** Configure an SNS topic to send messages to an SQS queue, which can be polled by a Lambda function or worker application.
-   - **Benefit:** Decouples notification handling, allowing asynchronous processing.
-
-2. **Amazon Simple Email Service (SES):**
-   - **Use Case:** Customize email content beyond SNS default templates.
-   - **Integration:** Use SES as a subscription endpoint for SNS or trigger SES directly via Lambda for branded emails.
-   - **Benefit:** Offers advanced email formatting and tracking (e.g., delivery status).
-
-3. **Amazon CloudTrail:**
-   - **Use Case:** Log alarm state changes for auditing.
-   - **Integration:** Enable CloudTrail to capture CloudWatch API calls (e.g., `PutMetricAlarm`) and store them in S3.
-   - **Benefit:** Provides a compliance and troubleshooting trail.
-
-4. **Amazon Step Functions:**
-   - **Use Case:** Orchestrate complex workflows triggered by alarms.
-   - **Integration:** Use EventBridge to start a Step Functions state machine that coordinates Lambda, SNS, and other services.
-   - **Benefit:** Automates multi-step incident response (e.g., notify team, scale resources, log incident).
-
-5. **Amazon DynamoDB:**
-   - **Use Case:** Store alarm history or metadata.
-   - **Integration:** Use a Lambda function triggered by the alarm to write data to a DynamoDB table.
-   - **Benefit:** Enables long-term storage and querying of alarm events.
-
-6. **Amazon Simple Storage Service (S3):**
-   - **Use Case:** Archive alarm data or logs.
-   - **Integration:** Configure a Lambda function to upload alarm details to an S3 bucket.
-   - **Benefit:** Provides durable storage for historical analysis.
-
----
-   
-</details>
+### Key Citations
+- [Monitor Amazon ECS using CloudWatch](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html)
+- [Amazon ECS Container Insights metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-ECS.html)
+- [Publish custom metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html)
+- [CloudWatch agent configuration](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-Agent-Configuration-File-Details.html)
+- [Amazon CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/)
+- [Amazon CloudWatch introduces High-Resolution Custom Metrics](https://aws.amazon.com/about-aws/whats-new/2017/07/amazon-cloudwatch-introduces-high-resolution-custom-metrics-and-alarms/)
+- [New – High-Resolution Custom Metrics for Amazon CloudWatch](https://aws.amazon.com/blogs/aws/new-high-resolution-custom-metrics-and-alarms-for-amazon-cloudwatch/)
+- [Use CloudWatch Container Insights to monitor Amazon ECS](https://repost.aws/knowledge-center/cloudwatch-container-insights-ecs)
+- [Container Insights with enhanced observability now available in Amazon ECS](https://aws.amazon.com/blogs/aws/container-insights-with-enhanced-observability-now-available-in-amazon-ecs/)
+- [Amazon CloudWatch Container Insights launches enhanced observability for Amazon ECS](https://aws.amazon.com/about-aws/whats-new/2024/12/amazon-cloudwatch-container-insights-observability-ecs/)
+- [Introducing Amazon CloudWatch Container Insights for Amazon ECS](https://aws.amazon.com/blogs/mt/introducing-container-insights-for-amazon-ecs/)
+- [CloudWatch Container Insights for Amazon EKS Clusters](https://www.kloia.com/blog/cloudwatch-container-insights-for-amazon-eks-clusters)
+- [Amazon Elastic Container Service (ECS) using Container Insights and CloudWatch](https://help.sumologic.com/docs/integrations/amazon-aws/elastic-container-service-container-insights-cloudwatch/)
+- [AWS Container Insights metric collection retention period](https://www.reddit.com/r/aws/comments/xcdewm/container_insights_metric_collection_retention/)
+- [Monitor ECS with CloudWatch Container Insights](https://aws.amazon.com/awstv/watch/188a1e29807/)
+- [AWS high resolution metrics for faster ECS scaling](https://stackoverflow.com/questions/63299977/aws-high-resolution-metrics-for-faster-ecs-scaling)
+- [Easily Monitor Containerized Applications with Amazon CloudWatch Container Insights](https://community.aws/content/2dr8ECO7VZXJwpew6b5gzs1F6Wh/navigating-amazon-eks-eks-monitor-containerized-applications?lang=en)
+- [AWS Adds Container Insights with Enhanced Observability to Elastic Container Service](https://www.infoq.com/news/2025/01/aws-container-insights-ecs/)
+- [Has anyone gone all in on CloudWatch Container Insights with Enhanced Observability?](https://www.reddit.com/r/devops/comments/1byhz45/has_anyone_gone_all_in_on_cloudwatch_container/)
