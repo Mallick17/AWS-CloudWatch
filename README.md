@@ -348,7 +348,7 @@ Instead of a static increment, you can extract a numerical value from the log ev
 
 ---
 
-# CloudWatch Cost
+# [CloudWatch Cost](https://aws.amazon.com/cloudwatch/pricing/)
 - **Metrics Cost:** You pay monthly for the number of unique metrics monitored, here 2 metrics at $0.30 each.
 - **High Resolution Metrics:** Pricing is same per metric regardless of data frequency, but you pay more if you send metrics every second (high resolution). Your current 60 sec interval is standard resolution, so no high resolution charge applies unless you reduce interval.
 - **API Costs:** API cost is for sending/fetching metric data. You send 60 API calls per hour which sums about 43,200 calls per month. Priced at $0.01 per 1,000 requests, resulting in about $0.44/month.
@@ -360,7 +360,7 @@ Instead of a static increment, you can extract a numerical value from the log ev
 - _Alarms:_ Up to 10 standard alarms on basic metrics free.
 > This covers many small workloads, but with thousands of metrics, you'll likely exceed it and pay tiered rates.
 
-### AWS CloudWatch Metrics Pricing Overview
+### [AWS CloudWatch Metrics Pricing Overview](https://cloudchipr.com/blog/cloudwatch-pricing#cloudwatch-metrics-pricing)
 #### 1. Default (Standard) CloudWatch Metrics Pricing
 Default metrics are automatically emitted by AWS services (e.g., EC2, RDS, Lambda) at standard resolution. These are free under basic monitoring—no per-metric charge or API hits for ingestion.
 
@@ -402,7 +402,7 @@ Metric filters extract custom metrics from CloudWatch Logs (e.g., parsing error 
   - **High usage note**: For dynamic logs (e.g., high-volume disk metrics), costs scale with GB ingested. Filters don't add resolution fees but increase custom metric count.
   - **Contributor Insights** (advanced log-based metrics): First rule free; $0.50/rule/month + $0.02 per million matched events after 1M free.
 
-#### 3. Modified/Created Metrics (e.g., Combining Two Metrics with Sum, Avg)
+#### 3. [Modified/Created Metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_billing.html) (e.g., Combining Two Metrics with Sum, Avg)
 You can create **derived metrics** using math expressions (e.g., SUM(CPU) + AVG(Memory)) via the console, APIs, or alarms. These aren't stored as new metrics unless you publish them via PutMetricData—otherwise, they're computed on-the-fly.
 
 - **Cost if computed on-the-fly** (e.g., in alarms or queries):
@@ -414,7 +414,7 @@ You can create **derived metrics** using math expressions (e.g., SUM(CPU) + AVG(
 - **Limitations**: Each combined metric can add to your total count (e.g., anomaly detection adds 3 metrics per alarm: actual + upper/lower bounds).
 - **Resolution**: Follows the input metrics; high-res inputs make the output high-res.
 
-#### 4. CloudWatch Agent Sending Metrics to CloudWatch
+#### 4. [CloudWatch Agent Sending Metrics to CloudWatch](https://www.vantage.sh/blog/cloudwatch-metrics-pricing-explained-in-plain-english)
 The CloudWatch agent (installed on EC2/on-premises) collects and sends custom metrics/logs (e.g., disk space, custom app metrics) via PutMetricData API. No separate agent fee—costs are for the metrics/logs sent.
 
 - **Cost structure**:
