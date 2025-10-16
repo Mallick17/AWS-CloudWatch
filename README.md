@@ -556,6 +556,31 @@ Basic free metrics include:
 #### 1. Default (Standard) CloudWatch Metrics Pricing
 Default metrics are automatically emitted by AWS services (e.g., EC2, RDS, Lambda) at standard resolution. These are free under basic monitoring—no per-metric charge or API hits for ingestion.
 
+<details>
+    <summary>Click to view Key details of Default Metrics</summary>
+
+Default metrics from AWS services are not free at 1-minute intervals across all AWS services. Most AWS services provide **basic monitoring** by default, which includes a standard set of metrics published to Amazon CloudWatch at 5-minute intervals with no additional charge (beyond standard CloudWatch storage and API costs, which have generous free tiers). Detailed monitoring, which offers 1-minute granularity for those same default metrics, must be explicitly enabled on supported services and incurs charges.
+
+### Key Details on Default Metrics and Intervals
+- **Basic Monitoring (Default for Most Services)**: Automatically enabled when you start using the service. Metrics are free, but limited to 5-minute periods. Examples include CPU utilization, network I/O, and disk metrics for Amazon EC2; request counts and latency for Amazon API Gateway; and storage metrics for Amazon S3 (reported daily by default, not 1-minute).
+- **Detailed Monitoring (1-Minute Intervals)**: Available only on select services (e.g., EC2, RDS, Auto Scaling groups, API Gateway). It's not enabled by default—you must activate it via the AWS Management Console, CLI, or API. Once enabled, these higher-resolution metrics are treated like custom metrics and are charged at $0.30 per metric per month for the first 10,000 metrics (with volume discounts beyond that). The first 10 detailed/custom metrics are free each month.
+- **Service Variations**: No AWS services provide 1-minute default metrics for free across the board. For instance:
+  - Amazon S3: Default storage metrics are free but daily; 1-minute request metrics require opt-in and are charged as custom metrics.
+  - Amazon EC2: Default is 5-minute basic (free); enabling 1-minute detailed monitoring charges based on the number of metrics per instance (e.g., ~26 metrics per instance at $0.30 each).
+  - Other services like Lambda or DynamoDB follow similar patterns: basic (often 1- or 5-minute) is free, but enhanced granularity may require paid features.
+
+| Monitoring Type | Default Interval | Free? | Charge for 1-Min? | Example Services |
+|-----------------|------------------|-------|-------------------|------------------|
+| Basic | 5 minutes (or coarser, e.g., daily for S3 storage) | Yes | N/A (can't change to 1-min without detailed) | EC2, RDS, S3, API Gateway, Lambda |
+| Detailed | 1 minute | No (must enable) | Yes ($0.30/metric/month after free tier) | EC2, RDS, Auto Scaling, API Gateway |
+
+### Impact of Changing Metrics Resolution
+Yes, if you change the resolution of default metrics to 1 minute (e.g., by enabling detailed monitoring), it will incur charges—even though these are still "default" metrics from the service. This is because CloudWatch treats detailed monitoring data points as billable custom/detailed metrics. You won't be charged for the basic 5-minute data, but the 1-minute version adds to your metric count. API requests to retrieve or view these metrics are also charged after the free tier (1 million requests/month).
+
+For the most current pricing (as of October 2025), check the [CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/), as rates can vary by region. If you're using a specific service, review its documentation for exact metric details.
+  
+</details>
+
 - **Free**: All basic default metrics from AWS services.
 - **Limitations**: If you enable **detailed monitoring** (1-minute resolution on top of basic), it counts as custom metrics and is charged after the 10-free limit.
 - **Cost structure** (for any charged custom/detailed metrics, including dynamic ones like disk space from EC2):
