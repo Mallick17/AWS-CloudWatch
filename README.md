@@ -360,6 +360,198 @@ Instead of a static increment, you can extract a numerical value from the log ev
 - _Alarms:_ Up to 10 standard alarms on basic metrics free.
 > This covers many small workloads, but with thousands of metrics, you'll likely exceed it and pay tiered rates.
 
+<details>
+    <summary>Click to view few Metrics Free for AWS Services</summary>
+
+### Free Basic AWS Service Metrics in CloudWatch
+
+Yes, as mentioned, basic monitoring metrics from AWS services are **completely free**—no charges for ingestion, storage, or retrieval under the standard resolution (typically 5-minute intervals). These are automatically published to CloudWatch for resources like instances, buckets, databases, etc. Detailed monitoring (1-minute intervals) or custom metrics beyond the free tier (10 custom metrics/month) incur costs.
+
+Nearly **all AWS services that support CloudWatch integration** provide basic free metrics. According to the official AWS documentation, over 100 services publish them, including EC2, S3, RDS, Lambda, DynamoDB, and more. Basic monitoring is enabled by default and free for all supported services.
+
+#### Full List of AWS Services with Free Basic Metrics
+Here's a comprehensive table of services (extracted from AWS docs). All have basic monitoring enabled and free by default. For detailed metrics per service, follow the provided links.
+
+| Service | Basic Free? | Example Basic Metrics | Details Link |
+|---------|-------------|-----------------------|--------------|
+| AWS Amplify | Yes | App-level requests, errors | [Link](https://docs.aws.amazon.com/amplify/latest/userguide/access-logs.html) |
+| Amazon API Gateway | Yes | Cache hit/miss, latency | [Link](https://docs.aws.amazon.com/apigateway/latest/developerguide/monitoring-cloudwatch.html) |
+| Amazon AppFlow | Yes | Flow runs, errors | [Link](https://docs.aws.amazon.com/appflow/latest/userguide/monitoring-cloudwatch.html) |
+| AWS Application Migration Service | Yes | Replication jobs, lag | [Link](https://docs.aws.amazon.com/mgn/latest/ug/monitoring-cloudwatch.html) |
+| AWS App Runner | Yes | CPU/memory utilization | [Link](https://docs.aws.amazon.com/apprunner/latest/dg/monitor-cw.html) |
+| AppStream 2.0 | Yes | Fleet utilization | [Link](https://docs.aws.amazon.com/appstream2/latest/developerguide/monitoring.html) |
+| AWS AppSync | Yes | Resolver invocations | [Link](https://docs.aws.amazon.com/appsync/latest/devguide/monitoring.html#cw-metrics) |
+| Amazon Athena | Yes | Query execution time | [Link](https://docs.aws.amazon.com/athena/latest/ug/query-metrics-viewing.html) |
+| Amazon Aurora | Yes | CPU, connections (RDS subset) | [Link](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMySQL.Monitoring.Metrics.html) |
+| AWS Backup | Yes | Backup jobs completed | [Link](https://docs.aws.amazon.com/aws-backup/latest/devguide/cloudwatch.html) |
+| Amazon Bedrock Guardrails | Yes | Evaluation counts | [Link](https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring-guardrails-cw-metrics.html) |
+| AWS Billing and Cost Management | Yes | Estimated charges | [Link](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/monitor-charges.html) |
+| Amazon Braket | Yes | Task runtime | [Link](https://docs.aws.amazon.com/braket/latest/developerguide/braket-monitor-metrics.html) |
+| AWS Certificate Manager | Yes | Certificate requests | [Link](https://docs.aws.amazon.com/acm/latest/userguide/cloudwatch-metrics.html) |
+| AWS Private CA | Yes | Certificate issuances | [Link](https://docs.aws.amazon.com/privateca/latest/userguide/PcaCloudWatch.html) |
+| Amazon Q Developer in chat applications | Yes | Chat sessions | [Link](https://docs.aws.amazon.com//chatbot/latest/adminguide/monitoring-cloudwatch.html) |
+| Amazon Chime | Yes | Call duration | [Link](https://docs.aws.amazon.com/chime/latest/ag/monitoring-cloudwatch.html) |
+| Amazon Chime SDK | Yes | Meeting participants | [Link](https://docs.aws.amazon.com/chime-sdk/latest/dg/service-metrics.html) |
+| AWS Client VPN | Yes | Connection attempts | [Link](https://docs.aws.amazon.com//vpn/latest/clientvpn-admin/monitoring-cloudwatch.html) |
+| Amazon CloudFront | Yes | Requests, bytes downloaded | [Link](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/monitoring-using-cloudwatch.html) |
+| AWS CloudHSM | Yes | HSM utilization | [Link](https://docs.aws.amazon.com/cloudhsm/latest/userguide/hsm-metrics-cw.html) |
+| Amazon CloudSearch | Yes | Search requests | [Link](https://docs.aws.amazon.com/cloudsearch/latest/developerguide/cloudwatch-monitoring.html) |
+| AWS CloudTrail | Yes | Event deliveries | [Link](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-lake-cloudwatch-metrics.html) |
+| CloudWatch agent | Yes | System metrics (CPU, etc.) | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/metrics-collected-by-CloudWatch-agent.html) |
+| CloudWatch Application Signals | Yes | App health scores | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AppSignals-MetricsCollected.html) |
+| CloudWatch metric streams | Yes | Stream successes | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-metric-streams-monitoring.html) |
+| CloudWatch RUM | Yes | Page load times | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM-metrics.html) |
+| CloudWatch Synthetics | Yes | Canary successes | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Synthetics_Canaries_metrics.html) |
+| Amazon CloudWatch Logs | Yes | Log group storage | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch-Logs-Monitoring-CloudWatch-Metrics.html) |
+| AWS CodeBuild | Yes | Build durations | [Link](https://docs.aws.amazon.com/codebuild/latest/userguide/monitoring-builds.html) |
+| Amazon CodeGuru Reviewer | Yes | Code reviews | [Link](https://docs.aws.amazon.com/codeguru/latest/reviewer-ug/monitoring.html) |
+| AWS CodePipeline | Yes | Pipeline executions | [Link](https://docs.aws.amazon.com/codepipeline/latest/userguide/metrics-dimensions.html) |
+| Amazon Kendra | Yes | Query counts | [Link](https://docs.aws.amazon.com/kendra/latest/dg/cloudwatch-metrics.html) |
+| Amazon Cognito | Yes | Sign-in attempts | [Link](https://docs.aws.amazon.com/cognito/latest/developerguide/monitoring.html) |
+| Amazon Comprehend | Yes | Document processing | [Link](https://docs.aws.amazon.com/comprehend/latest/dg/manage-endpoints-monitor.html) |
+| AWS Config | Yes | Config rule evaluations | [Link](https://docs.aws.amazon.com/config/latest/developerguide/viewing-the-aws-config-dashboard.html#aws-config-dashboard-metrics) |
+| Amazon Connect | Yes | Contact queues | [Link](https://docs.aws.amazon.com/connect/latest/adminguide/monitoring-cloudwatch.html) |
+| Amazon Data Lifecycle Manager | Yes | Policy executions | [Link](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitor-dlm-cw-metrics.html) |
+| AWS DataSync | Yes | Transfer bytes | [Link](https://docs.aws.amazon.com/datasync/latest/userguide/monitor-datasync.html) |
+| Amazon DataZone | Yes | Domain projects | [Link](https://docs.aws.amazon.com/datazone/latest/userguide/monitoring-cloudwatch.html) |
+| Amazon DevOps Guru | Yes | Insight severities | [Link](https://docs.aws.amazon.com/devops-guru/latest/userguide/monitoring-cloudwatch.html) |
+| AWS Database Migration Service | Yes | Replication lag | [Link](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Monitoring.html) |
+| AWS Direct Connect | Yes | Connection bandwidth | [Link](https://docs.aws.amazon.com/directconnect/latest/UserGuide/monitoring-cloudwatch.html) |
+| AWS Directory Service | Yes | Directory size | [Link](https://docs.aws.amazon.com/directoryservice/latest/admin-guide/ms_ad_deploy_additional_dcs.html#scaledcs) |
+| Amazon DocumentDB | Yes | CPU, connections | [Link](https://docs.aws.amazon.com//documentdb/latest/developerguide/cloud_watch.html) |
+| Amazon DynamoDB | Yes | Read/write capacity | [Link](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/metrics-dimensions.html) |
+| DynamoDB Accelerator (DAX) | Yes | Cache hits | [Link](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/dax-metrics-dimensions-dax.html) |
+| Amazon EC2 | Yes | CPU utilization, network in/out | [Link](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html) |
+| Amazon EC2 Elastic Graphics | Yes | GPU utilization | [Link](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-graphics-cloudwatch.html) |
+| Amazon EC2 Spot Fleet | Yes | Fleet requests | [Link](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-cloudwatch-metrics.html) |
+| Amazon EC2 Auto Scaling | Yes | Group desired capacity | [Link](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html) |
+| AWS Elastic Beanstalk | Yes | Environment health | [Link](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/health-enhanced-cloudwatch.html) |
+| Amazon Elastic Block Store | Yes | Volume read/write ops | [Link](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cloudwatch_ebs.html) |
+| Amazon Elastic Container Registry | Yes | Repository pulls | [Link](https://docs.aws.amazon.com/AmazonECR/latest/userguide/ecr-repository-metrics.html) |
+| Amazon Elastic Container Service | Yes | Task CPU/memory | [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html) |
+| Amazon ECS through CloudWatch Container Insights | Yes | Cluster utilization | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-ECS.html) |
+| Amazon ECS Cluster auto scaling | Yes | Capacity providers | [Link](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html#asg-capacity-providers-managed-scaling) |
+| AWS Elastic Disaster Recovery | Yes | Replication status | [Link](https://docs.aws.amazon.com/drs/latest/userguide/monitoring-event-bridge-metrics.html) |
+| Amazon Elastic File System | Yes | Permitted throughput | [Link](https://docs.aws.amazon.com/efs/latest/ug/monitoring-cloudwatch.html) |
+| Amazon Elastic Inference | Yes | Inference utilizations | [Link](https://docs.aws.amazon.com/elastic-inference/latest/developerguide/ei-cloudwatch-metrics.html) |
+| Amazon EKS | Yes | Cluster node counts | [Link](https://docs.aws.amazon.com/eks/latest/userguide/cloudwatch.html#cloudwatch-basic-metrics) |
+| Amazon EKS through CloudWatch Container Insights | Yes | Pod CPU/memory | [Link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-metrics-EKS.html) |
+| Elastic Load Balancing (ALB) | Yes | Request count, latency | [Link](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html) |
+| Elastic Load Balancing (NLB) | Yes | Active connections | [Link](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/load-balancer-cloudwatch-metrics.html) |
+| Elastic Load Balancing (GLB) | Yes | Processed bytes | [Link](https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/cloudwatch-metrics.html) |
+| Elastic Load Balancing (Classic) | Yes | Healthy hosts | [Link](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-cloudwatch-metrics.html) |
+| Amazon Elastic Transcoder | Yes | Job progress | [Link](https://docs.aws.amazon.com/elastictranscoder/latest/developerguide/monitoring-cloudwatch.html) |
+| Amazon ElastiCache (Memcached) | Yes | Cache hits/misses | [Link](https://docs.aws.amazon.com/AmazonElastiCache/latest/mem-ug/CacheMetrics.html) |
+| Amazon ElastiCache (Redis) | Yes | Commands processed | [Link](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/CacheMetrics.html) |
+| Amazon OpenSearch Service | Yes | Cluster status | [Link](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-cloudwatchmetrics.html) |
+| Amazon EMR | Yes | Cluster steps | [Link](https://docs.aws.amazon.com/emr/latest/ManagementGuide/UsingEMR_ViewingMetrics.html) |
+| Amazon EMR Serverless | Yes | Application runs | [Link](https://docs.aws.amazon.com/emr/latest/ManagementGuide/app-job-metrics.html) |
+| AWS Elemental MediaConnect | Yes | Flow health | [Link](https://docs.aws.amazon.com/mediaconnect/latest/ug/monitor-with-cloudwatch.html) |
+| AWS Elemental MediaConvert | Yes | Job encodes | [Link](https://docs.aws.amazon.com/mediaconvert/latest/ug/MediaConvert-metrics.html) |
+| AWS Elemental MediaLive | Yes | Channel inputs | [Link](https://docs.aws.amazon.com/medialive/latest/ug/monitoring-eml-metrics.html) |
+| AWS Elemental MediaPackage | Yes | Channel requests | [Link](https://docs.aws.amazon.com/mediapackage/latest/ug/monitoring-cloudwatch.html#metrics) |
+| AWS Elemental MediaStore | Yes | Container requests | [Link](https://docs.aws.amazon.com/mediastore/latest/ug/monitor-with-cloudwatch-metrics.html) |
+| AWS Elemental MediaTailor | Yes | Playback errors | [Link](https://docs.aws.amazon.com/mediatailor/latest/ug/monitoring-cloudwatch.html) |
+| AWS End User Messaging SMS | Yes | Message deliveries | [Link](https://docs.aws.amazon.com/sms-voice/latest/userguide/monitoring-cloudwatch.html) |
+| AWS End User Messaging Social | Yes | Channel sends | [Link](https://docs.aws.amazon.com/social-messaging/latest/userguide/monitoring-cloudwatch.html) |
+| Amazon EventBridge | Yes | Rule invocations | [Link](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-monitoring.html) |
+| Amazon FinSpace | Yes | Cluster loads | [Link](https://docs.aws.amazon.com/finspace/latest/userguide/kdb-cluster-logging-monitoring.html) |
+| Amazon Forecast | Yes | Dataset imports | [Link](https://docs.aws.amazon.com/forecast/latest/dg/cloudwatch-metrics.html) |
+| Amazon Fraud Detector | Yes | Detector evaluations | [Link](https://docs.aws.amazon.com/frauddetector/latest/ug/monitoring-cloudwatch.html#YourService-metrics) |
+| Amazon FSx for Lustre | Yes | Data read bytes | [Link](https://docs.aws.amazon.com/fsx/latest/LustreGuide/monitoring_overview.html) |
+| Amazon FSx for OpenZFS | Yes | Dataset throughput | [Link](https://docs.aws.amazon.com/fsx/latest/OpenZFSGuide/monitoring-cloudwatch.html) |
+| Amazon FSx for Windows File Server | Yes | Free space | [Link](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/monitoring_overview.html) |
+| Amazon FSx for NetApp ONTAP | Yes | Volume IOPS | [Link](https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/monitoring-cloudwatch.html) |
+| Amazon GameLift Servers | Yes | Fleet utilization | [Link](https://docs.aws.amazon.com/gamelift/latest/developerguide/monitoring-cloudwatch.html) |
+| AWS Global Accelerator | Yes | Client processed bytes | [Link](https://docs.aws.amazon.com/global-accelerator/latest/dg/cloudwatch-monitoring.html) |
+| AWS Glue | Yes | Job runs | [Link](https://docs.aws.amazon.com/glue/latest/dg/monitoring-awsglue-with-cloudwatch-metrics.html) |
+| AWS Ground Station | Yes | Contact durations | [Link](https://docs.aws.amazon.com/ground-station/latest/ug/metrics.html) |
+| AWS HealthLake | Yes | Store queries | [Link](https://docs.aws.amazon.com/healthlake/latest/devguide/monitoring-cloudwatch.html) |
+| Amazon Inspector | Yes | Assessment runs | [Link](https://docs.aws.amazon.com/inspector/latest/userguide/using-cloudwatch.html) |
+| Amazon Interactive Video Service | Yes | Stream viewers | [Link](https://docs.aws.amazon.com/ivs/latest/userguide/ivs-metrics.html) |
+| Amazon Interactive Video Service Chat | Yes | Message sends | [Link](https://docs.aws.amazon.com/ivs/latest/userguide/ivs-metrics.html) |
+| AWS IoT | Yes | Message deliveries | [Link](https://docs.aws.amazon.com/iot/latest/developerguide/metrics_dimensions.html) |
+
+*(Table truncated for brevity; full list includes 100+ services like AWS IoT Core, Amazon Kinesis, AWS Lambda, Amazon MSK, Amazon Neptune, Amazon QLDB, Amazon Redshift, Amazon S3, Amazon SageMaker, AWS Secrets Manager, Amazon SNS, Amazon SQS, AWS Step Functions, Amazon Timestream, and more. All basic metrics are free.)*
+
+#### Detailed Basic Free Metrics for Popular Services
+Here are examples of free basic metrics generated by AWS for monitoring key services. These are automatically emitted at 5-minute intervals.
+
+**Amazon EC2 (Namespace: AWS/EC2)**
+- CPUUtilization
+- DiskReadOps
+- DiskWriteOps
+- DiskReadBytes
+- DiskWriteBytes
+- NetworkIn
+- NetworkOut
+- NetworkPacketsIn
+- NetworkPacketsOut
+- StatusCheckFailed
+- StatusCheckFailed_Instance
+- StatusCheckFailed_System
+
+**Amazon S3 (Namespace: AWS/S3)**
+- **Daily Storage**: BucketSizeBytes, NumberOfObjects
+- **Requests**: AllRequests, GetRequests, PutRequests, DeleteRequests, HeadRequests, PostRequests, ListRequests, BytesDownloaded, BytesUploaded, 4xxErrors, 5xxErrors, FirstByteLatency, TotalRequestLatency
+- **Replication**: ReplicationLatency, BytesPendingReplication, OperationsPendingReplication, OperationsFailedReplication
+
+**Amazon RDS (Namespace: AWS/RDS)**
+- BinLogDiskUsage
+- BurstBalance
+- CPUUtilization
+- CPUCreditUsage
+- CPUCreditBalance
+- DatabaseConnections
+- DiskQueueDepth
+- FreeableMemory
+- FreeStorageSpace
+- NetworkReceiveThroughput
+- NetworkTransmitThroughput
+- ReadIOPS
+- ReadLatency
+- ReadThroughput
+- ReplicaLag
+- SwapUsage
+- WriteIOPS
+- WriteLatency
+- WriteThroughput
+
+**AWS Lambda (Namespace: AWS/Lambda)**
+Basic free metrics include:
+- Invocations (number of times a function is invoked)
+- Duration (execution time in ms)
+- Errors (function errors)
+- Throttles (throttled invocations)
+- DeadLetterErrors (errors sending to DLQ)
+- IteratorAge (for stream sources, age of last record)
+
+**Amazon DynamoDB (Namespace: AWS/DynamoDB)**
+- ConsumedReadCapacityUnits
+- ConsumedWriteCapacityUnits
+- ReadThrottleEvents
+- WriteThrottleEvents
+- ReturnedItemCount
+- SuccessfulRequestLatency
+- SystemErrors
+- UserErrors
+- ThrottledRequests
+- TransactionConflict
+
+**Elastic Load Balancing - Application Load Balancer (Namespace: AWS/ApplicationELB)**
+- ActiveConnectionCount
+- NewConnectionCount
+- ProcessedBytes
+- RequestCount
+- HTTPCode_ELB_3XX_Count
+- HTTPCode_ELB_4XX_Count
+- HTTPCode_ELB_5XX_Count
+- HealthyHostCount
+- UnHealthyHostCount
+- TargetResponseTime
+  
+</details>
+
 ### [AWS CloudWatch Metrics Pricing Overview](https://cloudchipr.com/blog/cloudwatch-pricing#cloudwatch-metrics-pricing)
 #### 1. Default (Standard) CloudWatch Metrics Pricing
 Default metrics are automatically emitted by AWS services (e.g., EC2, RDS, Lambda) at standard resolution. These are free under basic monitoring—no per-metric charge or API hits for ingestion.
