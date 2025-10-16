@@ -2,6 +2,7 @@
 - **Metrics Cost:** You pay monthly for the number of unique metrics monitored, here 2 metrics at $0.30 each.
 - **High Resolution Metrics:** Pricing is same per metric regardless of data frequency, but you pay more if you send metrics every second (high resolution). Your current 60 sec interval is standard resolution, so no high resolution charge applies unless you reduce interval.
 - **API Costs:** API cost is for sending/fetching metric data. You send 60 API calls per hour which sums about 43,200 calls per month. Priced at $0.01 per 1,000 requests, resulting in about $0.44/month.
+> [CW Metric Blog](https://awsfundamentals.com/blog/understanding-aws-cloudwatch-pricing-a-comprehensive-guide#aws-cloudwatch-metrics-pricing)
 
 ## AWS provides a free tier every month (reset monthly):
 - _Basic monitoring metrics_ from AWS services (e.g., EC2 CPU utilization, S3 request counts): Completely free, no limits on volume.
