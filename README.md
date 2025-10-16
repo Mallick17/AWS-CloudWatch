@@ -360,4 +360,76 @@ Instead of a static increment, you can extract a numerical value from the log ev
 - _Alarms:_ Up to 10 standard alarms on basic metrics free.
 > This covers many small workloads, but with thousands of metrics, you'll likely exceed it and pay tiered rates.
 
-##
+### AWS CloudWatch Metrics Pricing Overview
+#### 1. Default (Standard) CloudWatch Metrics Pricing
+Default metrics are automatically emitted by AWS services (e.g., EC2, RDS, Lambda) at standard resolution. These are free under basic monitoring—no per-metric charge or API hits for ingestion.
+
+- **Free**: All basic default metrics from AWS services.
+- **Limitations**: If you enable **detailed monitoring** (1-minute resolution on top of basic), it counts as custom metrics and is charged after the 10-free limit.
+- **Cost structure** (for any charged custom/detailed metrics, including dynamic ones like disk space from EC2):
+  | Tier | Metrics per Month | Price per Metric/Month |
+  |------|-------------------|------------------------|
+  | First | 10,000 | $0.30 |
+  | Next (10,001–250,000) | 240,000 | $0.10 |
+  | Next (250,001+) | Unlimited | $0.05 |
+
+  - **Example for your scenario**: With thousands of metrics from AWS services + custom (assume 5,000 total custom metrics/month):
+    - First 10 free.
+    - Next 4,990 at $0.30 = ~$1,497/month.
+    - Yearly estimate: ~$17,964 (assumes consistent usage; actual prorated).
+  - **Resolution impact**: Standard is default (no extra cost). High-resolution metrics (e.g., for low-latency apps) use the same tiers but generate more data points, increasing API/stream costs if you query/export them.
+  - **API requests for metrics** (e.g., retrieving data via GetMetricData API):
+    - $0.01 per 1,000 requests after 1M free/month.
+    - **Example**: 10 million requests/month = ~$90/month after free tier (9M charged × $0.01/1K). Yearly: ~$1,080.
+    - Dynamic metrics (e.g., disk space) are ingested free if basic, but queries hit API limits.
+
+#### 2. Metric Filters from Logs
+Metric filters extract custom metrics from CloudWatch Logs (e.g., parsing error counts from app logs). This incurs **logs ingestion/archival costs** + **custom metric charges** (as the extracted value becomes a stored metric).
+
+- **Free tier**: First 5 GB logs ingested/archived per month.
+- **Cost structure**:
+  | Component | Pricing (after free tier) |
+  |-----------|---------------------------|
+  | Logs Ingestion | $0.50/GB (first 10 TB/month); tiers down to $0.05/GB for 100+ TB. Vended logs (e.g., from VPC Flow Logs) have separate delivery fees (~$0.50/GB initially). |
+  | Logs Archival | $0.03/GB/month. |
+  | Extracted Metric | Same as custom metrics above ($0.30+ per metric/month). |
+
+  - **Example**: 30 GB logs/month with 5 extracted metrics:
+    - Ingestion: 25 GB charged × $0.50 = $12.50.
+    - Archival: ~6 GB compressed × $0.03 = $0.18.
+    - Metrics: 5 × $0.30 = $1.50.
+    - Total: ~$14.18/month. Yearly: ~$170.
+  - **High usage note**: For dynamic logs (e.g., high-volume disk metrics), costs scale with GB ingested. Filters don't add resolution fees but increase custom metric count.
+  - **Contributor Insights** (advanced log-based metrics): First rule free; $0.50/rule/month + $0.02 per million matched events after 1M free.
+
+#### 3. Modified/Created Metrics (e.g., Combining Two Metrics with Sum, Avg)
+You can create **derived metrics** using math expressions (e.g., SUM(CPU) + AVG(Memory)) via the console, APIs, or alarms. These aren't stored as new metrics unless you publish them via PutMetricData—otherwise, they're computed on-the-fly.
+
+- **Cost if computed on-the-fly** (e.g., in alarms or queries):
+  - No storage cost; charged via **alarm** ($0.10 per underlying metric/alarm/month) or **Metrics Insights query** ($0.01 per 1,000 metrics analyzed).
+  - **Example**: Alarm combining 3 metrics (sum/avg): $0.10 × 3 = $0.30/month per alarm. Yearly: ~$3.60.
+- **Cost if stored as custom metric** (e.g., publish the result):
+  - Treated as a new custom metric: $0.30+ per metric/month (same tiers as above).
+  - Plus API request for publishing: Included in the 1M free PutMetricData calls.
+- **Limitations**: Each combined metric can add to your total count (e.g., anomaly detection adds 3 metrics per alarm: actual + upper/lower bounds).
+- **Resolution**: Follows the input metrics; high-res inputs make the output high-res.
+
+#### 4. CloudWatch Agent Sending Metrics to CloudWatch
+The CloudWatch agent (installed on EC2/on-premises) collects and sends custom metrics/logs (e.g., disk space, custom app metrics) via PutMetricData API. No separate agent fee—costs are for the metrics/logs sent.
+
+- **Cost structure**:
+  - **Metrics sent**: Custom metric rates ($0.30+ per metric/month after 10 free).
+  - **API calls**: PutMetricData included in 1M free requests/month; $0.01/1K after.
+  - **If sending logs too**: Logs ingestion ($0.50/GB after 5 GB free).
+- **Example**: Agent on 10 EC2 instances sending 20 custom metrics each (200 total/month) + disk space (dynamic, 1-min resolution):
+  - Metrics: 200 × $0.30 = $60/month.
+  - API: Assume 1 call/minute per instance (14,400/month total) = free (under 1M).
+  - Yearly estimate: $720 (metrics only).
+- **High usage**: For thousands of metrics, volume tiers kick in (e.g., 50,000 metrics = ~$5,150/month after tiers). Agent doesn't affect resolution pricing directly.
+
+#### Tips for Your Setup (Thousands of Metrics)
+- **Total cost drivers**: Custom/dynamic metrics dominate (e.g., $0.30 each initially). Monitor via AWS Cost Explorer to tag and optimize.
+- **Reducing costs**: Use basic monitoring where possible, delete unused metrics, or stream to S3 for cheaper storage ($0.003/1K updates via Metric Streams).
+- **Free plan structure**: Monthly reset—ideal for low-volume testing. No yearly free equivalent.
+- For exact yearly projection with your AWS services/custom setup, input into the AWS Pricing Calculator.
+
