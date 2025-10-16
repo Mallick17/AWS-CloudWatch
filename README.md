@@ -650,3 +650,26 @@ The CloudWatch agent (installed on EC2/on-premises) collects and sends custom me
 - **Free plan structure**: Monthly reset—ideal for low-volume testing. No yearly free equivalent.
 - For exact yearly projection with your AWS services/custom setup, input into the AWS Pricing Calculator.
 
+## CloudWatch Charges for Metrics with No Data Points
+No, If you've created custom metrics in Amazon CloudWatch but no data points (output) are published to them, you are **not charged** for those metrics. CloudWatch charges for custom and detailed metrics are based on the number of active metrics, prorated hourly—but a metric is only considered active (and billable) during an hour when at least one data point is published to it via the PutMetricData API, CloudWatch Agent, or service emissions. If no data is sent in a given hour, no charge applies for that period.
+
+This applies to:
+- **Custom metrics**: Defined by a unique combination of namespace, metric name, and dimensions (e.g., a metric like "CPUUtilization" under a custom namespace). If inactive, they don't accrue costs.
+- **Detailed monitoring metrics**: Treated like custom metrics; charges only when data is emitted at 1-minute intervals (which requires enabling it and having activity).
+
+Basic monitoring metrics from AWS services (e.g., standard EC2 CPU metrics at 5-minute intervals) are always free, regardless of data points.
+
+#### Key Details on Metric Charges and Inactivity
+- **Proration and Billing**: $0.30 per metric per month for the first 10,000 (with tiered discounts beyond that), but only for hours with data publication. The first 10 custom/detailed metrics are free monthly.
+- **Expiration for Inactive Metrics**: Metrics automatically expire after 15 months if no data points are published in the last 2 weeks. Older data points roll off based on retention periods (e.g., 15 days for 1-minute data).
+- **Common Pitfalls**: If a CloudWatch Agent or script is running and configured to collect metrics, it may continue publishing data points (even zeros or defaults), triggering hourly charges. Stop/uninstall the agent to avoid this.
+- **Alarms Note**: This doesn't apply to alarms, which are charged $0.10/month each regardless of activity or metric data.
+
+| Scenario | Charged? | Reason | Example |
+|----------|----------|--------|---------|
+| Custom metric created, no data published | No | No hourly data points = no proration | PutMetricData called once to define, but never with values |
+| Metric receives data sporadically (e.g., 1 hour/week) | Partial | Prorated for active hours only | ~$0.0125/hour of activity ($0.30/24 hours/month) |
+| Detailed monitoring enabled, no activity | Yes (if enabled) | Service may emit baseline data points | EC2 detailed: Charges for ~7 metrics/instance if 1-min data flows |
+| Basic AWS metrics (free tier) | No | Always free, even with data | S3 request counts at 5-min intervals |
+
+For the latest pricing (as of October 2025), check the [CloudWatch pricing page](https://aws.amazon.com/cloudwatch/pricing/) or use the AWS Cost Explorer to audit your metrics. If you're seeing unexpected charges, review active custom namespaces in the CloudWatch console under Metrics > All metrics.
